@@ -9,7 +9,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copy file JAR đã build từ stage trước
-COPY --from=build /app/target/tkd_v1-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
