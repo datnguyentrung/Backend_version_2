@@ -1,0 +1,52 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/version_2
+    username: root
+    password: 31102005
+
+    #    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    #    username: postgres.vtyfhxstygumgbhucpni
+    #    password: 123456
+
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    deserialization:
+      ACCEPT_SINGLE_VALUE_AS_ARRAY: true
+
+#supabase:
+#  storage:
+#    url: https://vtyfhxstygumgbhucpni.supabase.co/storage/v1
+#    api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0eWZoeHN0eWd1bWdiaHVjcG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjg2Mzk0OCwiZXhwIjoyMDY4NDM5OTQ4fQ.-j0IB_W6UgPkA-xYKwVhA6Tny15zwReHTLt190LdCjE
+#    bucket:
+#      student: uploads-student
+#      coach: uploads-coach
+#      admin: uploads-admin
+#      client: uploads-client
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+jwt:
+  base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
+  access-token-validity-in-seconds: 86400 # 1 ngày
+  refresh-token-validity-in-seconds: 8640000 # 100 ngày
+
+password:
+  time_password_change_days: 30
+
+#app:
+#  upload-dir: ../WEB_8/upload
