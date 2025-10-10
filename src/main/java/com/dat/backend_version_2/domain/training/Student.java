@@ -38,6 +38,7 @@ public class Student extends Users {
     private BeltLevel beltLevel = BeltLevel.C10;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<StudentClassSession> studentClassSessions = new ArrayList<>();
 
     private LocalDate startDate = LocalDate.now();

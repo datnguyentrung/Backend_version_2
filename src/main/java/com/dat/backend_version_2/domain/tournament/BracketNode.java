@@ -34,7 +34,8 @@ public class BracketNode {
     @ElementCollection
     @CollectionTable(
             name = "bracket_node_links",
-            joinColumns = @JoinColumn(name = "bracket_node_id")
+            joinColumns = @JoinColumn(name = "bracket_node_id"),
+            schema = "association"
     )
     @JsonIgnore
     @Column(name = "linked_node_id")

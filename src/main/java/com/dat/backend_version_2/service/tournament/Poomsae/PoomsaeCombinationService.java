@@ -15,12 +15,12 @@ public class PoomsaeCombinationService {
     private final PoomsaeCombinationRepository poomsaeCombinationRepository;
 
     public List<PoomsaeCombination> getAllCombinations() {
-        return poomsaeCombinationRepository.findAll();
+        return poomsaeCombinationRepository.findAllWithGraph();
     }
 
     public PoomsaeCombination getCombinationById(String id) throws IdInvalidException {
         return poomsaeCombinationRepository.findById(UUID.fromString(id))
-                .orElseThrow(()-> new IdInvalidException("Poomsae combination not found with id: " + id));
+                .orElseThrow(() -> new IdInvalidException("Poomsae combination not found with id: " + id));
     }
 
     public PoomsaeCombination createCombination(PoomsaeCombination combination) {

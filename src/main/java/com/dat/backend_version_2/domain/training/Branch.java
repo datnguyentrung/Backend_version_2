@@ -24,7 +24,11 @@ public class Branch {
     private String address;
 
     @ElementCollection(targetClass = Weekday.class)
-    @CollectionTable(name = "branch_weekdays", joinColumns = @JoinColumn(name = "id_branch"))
+    @CollectionTable(
+            name = "branch_weekdays",
+            joinColumns = @JoinColumn(name = "id_branch"),
+            schema = "association"
+    )
     @Column(name = "weekday")
     @Enumerated(EnumType.STRING)
     private List<Weekday> weekdays;

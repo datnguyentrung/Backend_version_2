@@ -26,7 +26,8 @@ public class BeltGroup {
     @ElementCollection(targetClass = BeltLevel.class)
     @CollectionTable(
             name = "belt_group_belt_levels",
-            joinColumns = @JoinColumn(name = "id_belt_group")
+            joinColumns = @JoinColumn(name = "id_belt_group"),
+            schema = "association"
     )
     @Enumerated(EnumType.STRING)
 //    @JsonIgnore

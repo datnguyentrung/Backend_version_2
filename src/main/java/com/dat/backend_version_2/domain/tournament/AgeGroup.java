@@ -25,7 +25,8 @@ public class AgeGroup {
     @ElementCollection(targetClass = AgeDivision.class)
     @CollectionTable(
             name = "age_group_age_divisions",
-            joinColumns = @JoinColumn(name = "id_age_group")
+            joinColumns = @JoinColumn(name = "id_age_group"),
+            schema = "association"
     )
     @Enumerated(EnumType.STRING)
 //    @JsonIgnore
