@@ -1,2 +1,0 @@
-org.springframework.context.ApplicationContextInitializer=com.dat.backend_version_2.config.DotenvConfig
-
