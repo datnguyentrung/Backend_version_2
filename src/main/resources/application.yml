@@ -1,41 +1,46 @@
 spring:
-  application:
-    name: backend_version_2
-  main:
-    allow-bean-definition-overriding: true
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/version_2}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:password}
+    url: jdbc:postgresql://localhost:5432/version_2
+    username: root
+    password: 31102005
+
+#    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+#    username: postgres.vtyfhxstygumgbhucpni
+#    password: 123456
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
-    database: ${JPA_DATABASE:postgresql}
-    show-sql: ${JPA_SHOW_SQL:true}
+      ddl-auto: update
+    database: postgresql
+    show-sql: true
 
   servlet:
     multipart:
-      max-file-size: ${MULTIPART_MAX_FILE_SIZE:10MB}
-      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:10MB}
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   jackson:
-    time-zone: ${JACKSON_TIMEZONE:Asia/Ho_Chi_Minh}
-    deserialization:
-      ACCEPT_SINGLE_VALUE_AS_ARRAY: ${JACKSON_ACCEPT_SINGLE_VALUE_AS_ARRAY:true}
+    time-zone: Asia/Ho_Chi_Minh
 
-server:
-  port: ${PORT:8080}
+#supabase:
+#  storage:
+#    url: https://vtyfhxstygumgbhucpni.supabase.co/storage/v1
+#    api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0eWZoeHN0eWd1bWdiaHVjcG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjg2Mzk0OCwiZXhwIjoyMDY4NDM5OTQ4fQ.-j0IB_W6UgPkA-xYKwVhA6Tny15zwReHTLt190LdCjE
+#    bucket:
+#      student: uploads-student
+#      coach: uploads-coach
+#      admin: uploads-admin
+#      client: uploads-client
 
 logging:
   level:
-    org.springframework.security: ${LOGGING_SECURITY_LEVEL:DEBUG}
+    org.springframework.security: DEBUG
 
 jwt:
-  base64-secret: ${JWT_BASE64_SECRET:TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==}
-  access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS:86400}
-  refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS:8640000}
+  base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
+  access-token-validity-in-seconds: 86400
+  refresh-token-validity-in-seconds: 8640000
 
 password:
-  time_password_change_days: ${TIME_PASSWORD_CHANGE_DAYS:30}
+  time_password_change_days: 30
