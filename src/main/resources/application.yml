@@ -1,19 +1,28 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/version_2
-    username: root
-    password: 31102005
+    #    url: jdbc:postgresql://localhost:5432/version_2
+    #    username: root
+    #    password: 31102005
 
-#    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
-#    username: postgres.vtyfhxstygumgbhucpni
-#    password: 123456
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    username: postgres.vrtckvdzbjlpjexfacqm
+    password: 31102005
     driver-class-name: org.postgresql.Driver
+
+    hikari:
+      maximum-pool-size: 5           # ✅ Giới hạn tối đa 5 connection (đủ cho backend)
+      minimum-idle: 1                # Giảm idle connection
+      idle-timeout: 10000            # Đóng connection sau 10s không hoạt động
+      max-lifetime: 300000           # Đổi connection sau 5 phút (phòng leak)
+      connection-timeout: 10000      # Thời gian chờ nếu pool đầy
+      leak-detection-threshold: 20000  # Log cảnh báo nếu connection mở >20s
 
   jpa:
     hibernate:
       ddl-auto: update
     database: postgresql
     show-sql: true
+    open-in-view: false              # ✅ Tắt open-in-view để tránh giữ connection lâu
 
   servlet:
     multipart:
@@ -23,19 +32,10 @@ spring:
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
-#supabase:
-#  storage:
-#    url: https://vtyfhxstygumgbhucpni.supabase.co/storage/v1
-#    api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0eWZoeHN0eWd1bWdiaHVjcG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjg2Mzk0OCwiZXhwIjoyMDY4NDM5OTQ4fQ.-j0IB_W6UgPkA-xYKwVhA6Tny15zwReHTLt190LdCjE
-#    bucket:
-#      student: uploads-student
-#      coach: uploads-coach
-#      admin: uploads-admin
-#      client: uploads-client
-
 logging:
   level:
     org.springframework.security: DEBUG
+    com.zaxxer.hikari: INFO          # ✅ Thêm log để xem trạng thái pool
 
 jwt:
   base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
