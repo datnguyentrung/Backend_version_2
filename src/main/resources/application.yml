@@ -4,7 +4,7 @@ spring:
     #    username: root
     #    password: 31102005
 
-    url: jdbc:postgresql://db.vrtckvdzbjlpjexfacqm.supabase.co:5432/postgres?sslmode=require
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require
     username: postgres.vrtckvdzbjlpjexfacqm
     password: 31102005
     driver-class-name: org.postgresql.Driver
