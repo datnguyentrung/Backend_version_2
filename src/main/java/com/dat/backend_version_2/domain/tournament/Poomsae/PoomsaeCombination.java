@@ -2,6 +2,7 @@ package com.dat.backend_version_2.domain.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.AgeGroup;
 import com.dat.backend_version_2.domain.tournament.BeltGroup;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "PoomsaeCombination", schema = "tournament")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PoomsaeCombination {
     @Id
     @GeneratedValue
@@ -23,15 +25,17 @@ public class PoomsaeCombination {
     @Column(updatable = false, nullable = false)
     private UUID idPoomsaeCombination;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poomsae_content")
     private PoomsaeContent poomsaeContent;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "age_group")
     private AgeGroup ageGroup;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "belt_group")
     private BeltGroup beltGroup;
+
+    private Boolean isActive = false;
 }

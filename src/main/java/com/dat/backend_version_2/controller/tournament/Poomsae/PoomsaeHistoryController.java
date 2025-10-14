@@ -20,15 +20,6 @@ import java.util.List;
 public class PoomsaeHistoryController {
     private final PoomsaeHistoryService poomsaeHistoryService;
 
-//    @PostMapping("/participants/{participants}")
-//    public ResponseEntity<String> createPoomsaeHistory(@PathVariable Integer participants) {
-//        if (participants == 0) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid participants");
-//        }
-//        poomsaeHistoryService.createPoomsaeHistory(participants);
-//        return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
-//    }
-
     @PostMapping
     public ResponseEntity<String> createPoomsaeHistory(@RequestBody List<String> poomsaeList
     ) throws IdInvalidException {
@@ -74,5 +65,12 @@ public class PoomsaeHistoryController {
 
         // ✅ Trả về phản hồi thành công (204 No Content hoặc 200 OK)
         return ResponseEntity.ok("Đã xóa PoomsaeHistory thành công (id = " + idPoomsaeHistory + ")");
+    }
+
+    @DeleteMapping("/combination/{idPoomsaeCombination}")
+    public ResponseEntity<String> deleteAllPoomsaeHistoryByIdPoomsaeCombination(
+            @PathVariable String idPoomsaeCombination) throws IdInvalidException {
+        poomsaeHistoryService.deleteAllPoomsaeHistoryByIdPoomsaeCombination(idPoomsaeCombination);
+        return ResponseEntity.ok("All Poomsae histories deleted for combination id: " + idPoomsaeCombination);
     }
 }

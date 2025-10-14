@@ -90,6 +90,13 @@ public class PoomsaeHistoryService {
     }
 
     @Transactional
+    public void deleteAllPoomsaeHistoryByIdPoomsaeCombination(String idPoomsaeCombination) throws IdInvalidException {
+        PoomsaeCombination combination = poomsaeCombinationService.getCombinationById(idPoomsaeCombination);
+        List<PoomsaeHistory> histories = poomsaeHistoryRepository.findAllByPoomsaeCombination(combination);
+        poomsaeHistoryRepository.deleteAll(histories);
+    }
+
+    @Transactional
     public String createWinner(PoomsaeHistoryDTO poomsaeHistoryDTO, int participants) throws IdInvalidException {
         // Lấy lịch sử thi đấu hiện tại
         PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
@@ -187,5 +194,9 @@ public class PoomsaeHistoryService {
 
         // 7️⃣ Xóa bản ghi gốc
         poomsaeHistoryRepository.delete(poomsaeHistory);
+    }
+
+    public Integer countPoomsaeHistoryByLevelNode(int levelNode) {
+        return poomsaeHistoryRepository.countPoomsaeHistoryByLevelNode(levelNode);
     }
 }

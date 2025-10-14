@@ -1,28 +1,20 @@
 spring:
   datasource:
-    #    url: jdbc:postgresql://localhost:5432/version_2
-    #    username: root
-    #    password: 31102005
-
-    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
-    username: postgres.vrtckvdzbjlpjexfacqm
+    url: jdbc:postgresql://localhost:5433/version_3
+    username: root
     password: 31102005
-    driver-class-name: org.postgresql.Driver
 
-    hikari:
-      maximum-pool-size: 5           # ✅ Giới hạn tối đa 5 connection (đủ cho backend)
-      minimum-idle: 1                # Giảm idle connection
-      idle-timeout: 10000            # Đóng connection sau 10s không hoạt động
-      max-lifetime: 300000           # Đổi connection sau 5 phút (phòng leak)
-      connection-timeout: 10000      # Thời gian chờ nếu pool đầy
-      leak-detection-threshold: 20000  # Log cảnh báo nếu connection mở >20s
+#    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+#    username: postgres.vrtckvdzbjlpjexfacqm
+#    password: 31102005
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
     database: postgresql
     show-sql: true
-    open-in-view: false              # ✅ Tắt open-in-view để tránh giữ connection lâu
+    open-in-view: true              # ✅ Tắt open-in-view để tránh giữ connection lâu
 
   servlet:
     multipart:

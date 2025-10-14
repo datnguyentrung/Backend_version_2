@@ -21,4 +21,6 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
                 WHERE pc = :poomsaeCombination
             """)
     List<PoomsaeHistory> findAllByPoomsaeCombination(@Param("poomsaeCombination") PoomsaeCombination poomsaeCombination);
+
+    Integer countPoomsaeHistoryByLevelNode(Integer levelNode);
 }
