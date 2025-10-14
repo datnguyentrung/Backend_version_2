@@ -22,5 +22,19 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
             """)
     List<PoomsaeHistory> findAllByPoomsaeCombination(@Param("poomsaeCombination") PoomsaeCombination poomsaeCombination);
 
+    @Query("""
+            SELECT DISTINCT ph
+                FROM PoomsaeHistory ph
+                    JOIN FETCH ph.poomsaeList pl
+                    JOIN FETCH pl.student s
+                    JOIN FETCH pl.poomsaeCombination pc
+                WHERE pc.idPoomsaeCombination = :idPoomsaeCombination
+                  AND ph.targetNode = :targetNode
+            """)
+    List<PoomsaeHistory> findAllByTargetNodeAndIdPoomsaeCombination(
+            @Param("targetNode") Integer targetNode,
+            @Param("idPoomsaeCombination") UUID idPoomsaeCombination
+    );
+
     Integer countPoomsaeHistoryByLevelNode(Integer levelNode);
 }

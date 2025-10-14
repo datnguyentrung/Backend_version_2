@@ -109,31 +109,54 @@ public class PoomsaeHistoryService {
         poomsaeHistoryRepository.save(poomsaeHistory);
 
         // Lấy target node cha
-        Integer parentNode = bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(
-                participants,
-                poomsaeHistory.getTargetNode()
-        ).getParentNodeId();
-        if (poomsaeHistoryDTO.getNodeInfo().getTargetNode() != 0 && parentNode == null) {
+        Integer parentNode = Optional.ofNullable(
+                bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(participants, poomsaeHistory.getTargetNode())
+        ).map(BracketNode::getParentNodeId).orElse(null);
+
+        // Đánh dấu thua cho đối thủ cùng parentNode(nếu có)
+        List<PoomsaeHistory> siblings = poomsaeHistoryRepository.findAllByTargetNodeAndIdPoomsaeCombination(
+                poomsaeHistory.getTargetNode(),
+                poomsaeHistory.getPoomsaeList().getPoomsaeCombination().getIdPoomsaeCombination()
+        );
+
+        for (PoomsaeHistory sibling : siblings) {
+            if (!sibling.getIdPoomsaeHistory().equals(poomsaeHistory.getIdPoomsaeHistory())) {
+                sibling.setHasWon(false);
+                poomsaeHistoryRepository.save(sibling);
+
+                if (poomsaeHistory.getLevelNode() == 2) {
+                    PoomsaeHistory losePoomsaeHistory = new PoomsaeHistory();
+                    losePoomsaeHistory.setLevelNode(-1);
+                    losePoomsaeHistory.setSourceNode(sibling.getTargetNode());
+                    losePoomsaeHistory.setTargetNode(-1);
+                    losePoomsaeHistory.setPoomsaeList(sibling.getPoomsaeList());
+                    poomsaeHistoryRepository.save(losePoomsaeHistory);
+                }
+            }
+        }
+
+        if ((poomsaeHistoryDTO.getNodeInfo().getTargetNode() != 0 && poomsaeHistoryDTO.getNodeInfo().getTargetNode() != -1)
+                && parentNode == null) {
             throw new IdInvalidException("Parent node not found for targetNode " + poomsaeHistory.getTargetNode());
         }
 
         // Tạo node mới cho vòng tiếp theo
-        PoomsaeHistory newPoomsaeHistory = new PoomsaeHistory();
-        newPoomsaeHistory.setLevelNode(poomsaeHistory.getLevelNode() - 1);
-        newPoomsaeHistory.setSourceNode(poomsaeHistory.getTargetNode());
-        newPoomsaeHistory.setTargetNode(parentNode);
+        PoomsaeHistory winPoomsaeHistory = new PoomsaeHistory();
+        winPoomsaeHistory.setLevelNode(poomsaeHistory.getLevelNode() - 1);
+        winPoomsaeHistory.setSourceNode(poomsaeHistory.getTargetNode());
+        winPoomsaeHistory.setTargetNode(parentNode);
 
         // Sao chép thông tin liên kết
-        newPoomsaeHistory.setPoomsaeList(poomsaeHistory.getPoomsaeList());
+        winPoomsaeHistory.setPoomsaeList(poomsaeHistory.getPoomsaeList());
 
-        poomsaeHistoryRepository.save(newPoomsaeHistory);
+        poomsaeHistoryRepository.save(winPoomsaeHistory);
 
-        return newPoomsaeHistory.getIdPoomsaeHistory().toString();
+        return winPoomsaeHistory.getIdPoomsaeHistory().toString();
     }
 
     /**
      * Xóa một bản ghi PoomsaeHistory và cập nhật trạng thái các node con liên quan.
-     *
+     * <p>
      * Quy trình:
      * 1. Lấy thông tin PoomsaeHistory cần xóa.
      * 2. Tìm tất cả node con (child nodes) trong cây bracket tương ứng.
@@ -142,8 +165,8 @@ public class PoomsaeHistoryService {
      * 5. Cập nhật trạng thái hasWon=false cho các node con.
      * 6. Cuối cùng, xóa bản ghi hiện tại.
      *
-     * @param participants        Số lượng người tham gia (để xác định bracket).
-     * @param idPoomsaeHistory    ID của bản ghi cần xóa.
+     * @param participants     Số lượng người tham gia (để xác định bracket).
+     * @param idPoomsaeHistory ID của bản ghi cần xóa.
      * @throws IdInvalidException Nếu không tìm thấy bản ghi hoặc dữ liệu không hợp lệ.
      */
     public void deletePoomsaeHistory(int participants, String idPoomsaeHistory) throws IdInvalidException {

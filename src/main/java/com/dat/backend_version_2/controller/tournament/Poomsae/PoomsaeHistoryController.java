@@ -49,8 +49,8 @@ public class PoomsaeHistoryController {
             @RequestParam int participants,
             @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
     ) throws IdInvalidException {
-        System.out.println("poomsaeHistoryDTO: " + poomsaeHistoryDTO);
-        System.out.println("participants: " + participants);
+//        System.out.println("poomsaeHistoryDTO: " + poomsaeHistoryDTO);
+//        System.out.println("participants: " + participants);
         String newNodeId = poomsaeHistoryService.createWinner(poomsaeHistoryDTO, participants);
         return ResponseEntity.ok("Winner created successfully with new node ID: " + newNodeId);
     }
