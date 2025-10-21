@@ -1,5 +1,7 @@
 package com.dat.backend_version_2.dto.tournament;
 
+import com.dat.backend_version_2.domain.tournament.AgeGroup;
+import com.dat.backend_version_2.enums.training.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +33,16 @@ public class SparringHistoryDTO {
         private String name;
         private String sparringList;
         private String sparringCombination;
+        private SparringCategory sparringCategory;
+    }
+
+    // ----------- Thông tin tổ hợp -----------
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SparringCategory {
+        private String ageGroupName;
+        private Gender gender;
+        private int weightClass;
     }
 }

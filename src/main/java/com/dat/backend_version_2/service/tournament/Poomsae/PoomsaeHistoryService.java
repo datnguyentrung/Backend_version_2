@@ -9,12 +9,14 @@ import com.dat.backend_version_2.dto.tournament.PoomsaeHistoryDTO;
 import com.dat.backend_version_2.mapper.tournament.PoomsaeHistoryMapper;
 import com.dat.backend_version_2.repository.achievement.PoomsaeListRepository;
 import com.dat.backend_version_2.repository.tournament.Poomsae.PoomsaeHistoryRepository;
+import com.dat.backend_version_2.service.achievement.PoomsaeListService;
 import com.dat.backend_version_2.service.tournament.BracketNodeService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -29,6 +31,7 @@ public class PoomsaeHistoryService {
     private final PoomsaeListRepository poomsaeListRepository;
     private final PoomsaeCombinationService poomsaeCombinationService;
     private static final Logger log = LoggerFactory.getLogger(PoomsaeHistoryService.class);
+    private final PoomsaeListService poomsaeListService;
 
     public PoomsaeHistory getPoomsaeHistoryById(String id) throws IdInvalidException {
         return poomsaeHistoryRepository.findById(UUID.fromString(id))
@@ -36,7 +39,41 @@ public class PoomsaeHistoryService {
     }
 
     @Transactional
-    public void createPoomsaeHistory(List<String> idPoomsaeList) throws IdInvalidException {
+    public void createPoomsaeHistoryForRoundRobin(List<String> idPoomsaeList) throws IdInvalidException {
+        List<UUID> uuidList = idPoomsaeList.stream()
+                .map(UUID::fromString)
+                .toList();
+
+        List<PoomsaeList> poomsaeLists = poomsaeListRepository.findAllByIdPoomsaeList(uuidList);
+
+        if (poomsaeLists.isEmpty()) {
+            throw new IdInvalidException("No valid PoomsaeList found for provided IDs");
+        }
+
+        int index = 0;
+        List<PoomsaeHistory> poomsaeHistories = new ArrayList<>();
+        if (poomsaeLists.size() > 8) {
+            for (PoomsaeList poomsaeList : poomsaeLists) {
+                PoomsaeHistory poomsaeHistory = new PoomsaeHistory();
+                poomsaeHistory.setPoomsaeList(poomsaeList);
+                poomsaeHistory.setLevelNode(2);
+                poomsaeHistory.setSourceNode(index++);
+                poomsaeHistories.add(poomsaeHistory);
+            }
+        } else {
+            for (PoomsaeList poomsaeList : poomsaeLists) {
+                PoomsaeHistory poomsaeHistory = new PoomsaeHistory();
+                poomsaeHistory.setPoomsaeList(poomsaeList);
+                poomsaeHistory.setLevelNode(1);
+                poomsaeHistory.setSourceNode(index++);
+                poomsaeHistories.add(poomsaeHistory);
+            }
+        }
+        poomsaeHistoryRepository.saveAll(poomsaeHistories);
+    }
+
+    @Transactional
+    public void createPoomsaeHistoryForNode(List<String> idPoomsaeList) throws IdInvalidException {
         // 1️⃣ Lấy toàn bộ danh sách trong 1 lần query
         List<UUID> uuidList = idPoomsaeList.stream()
                 .map(UUID::fromString)
@@ -96,8 +133,45 @@ public class PoomsaeHistoryService {
         poomsaeHistoryRepository.deleteAll(histories);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void createWinnerForRoundRobin(PoomsaeHistoryDTO poomsaeHistoryDTO) throws IdInvalidException {
+        PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
+        if (poomsaeHistory == null) {
+            throw new IdInvalidException("PoomsaeHistory not found");
+        }
+
+        PoomsaeList poomsaeList = poomsaeListService.getPoomsaeListById(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeList());
+
+        // Đánh dấu đã thắng
+        poomsaeHistory.setHasWon(true);
+
+        // Lấy target node cha
+        int parentNode = poomsaeHistoryDTO.getNodeInfo().getTargetNode();
+        int levelNextNode = poomsaeHistoryDTO.getNodeInfo().getLevelNode() - 1;
+
+        if (levelNextNode < 0) {
+            throw new IllegalStateException("Already at top level — cannot create higher node");
+        }
+
+        // Kiểm tra vị trí đó đã có người thắng chưa
+        Optional<PoomsaeHistory> existingWinner = poomsaeHistoryRepository.findByIdPoomsaeCombinationAndLevelNodeAndSourceNode(
+                UUID.fromString(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeCombination()),
+                levelNextNode,
+                parentNode
+        );
+        existingWinner.ifPresent(poomsaeHistoryRepository::delete);
+
+        // Tạo node mới cho vòng tiếp theo
+        PoomsaeHistory winPoomsaeHistory = new PoomsaeHistory();
+        winPoomsaeHistory.setSourceNode(parentNode);
+        winPoomsaeHistory.setLevelNode(levelNextNode);
+        winPoomsaeHistory.setPoomsaeList(poomsaeList);
+
+        poomsaeHistoryRepository.save(winPoomsaeHistory);
+    }
+
     @Transactional
-    public String createWinner(PoomsaeHistoryDTO poomsaeHistoryDTO, int participants) throws IdInvalidException {
+    public String createWinnerForElimination(PoomsaeHistoryDTO poomsaeHistoryDTO, int participants) throws IdInvalidException {
         // Lấy lịch sử thi đấu hiện tại
         PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
         if (poomsaeHistory == null) {
@@ -169,7 +243,7 @@ public class PoomsaeHistoryService {
      * @param idPoomsaeHistory ID của bản ghi cần xóa.
      * @throws IdInvalidException Nếu không tìm thấy bản ghi hoặc dữ liệu không hợp lệ.
      */
-    public void deletePoomsaeHistory(int participants, String idPoomsaeHistory) throws IdInvalidException {
+    public void deletePoomsaeHistoryForElimination(int participants, String idPoomsaeHistory) throws IdInvalidException {
 
         // 1️⃣ Lấy ra bản ghi PoomsaeHistory cần xóa
         PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(idPoomsaeHistory);
@@ -219,7 +293,23 @@ public class PoomsaeHistoryService {
         poomsaeHistoryRepository.delete(poomsaeHistory);
     }
 
+    public void deletePoomsaeHistoryForRoundRobin(String idPoomsaeHistory) throws IdInvalidException {
+        PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(idPoomsaeHistory);
+        if (poomsaeHistory == null) {
+            throw new IdInvalidException("PoomsaeHistory not found with id: " + idPoomsaeHistory);
+        }
+        poomsaeHistoryRepository.delete(poomsaeHistory);
+    }
+
     public Integer countPoomsaeHistoryByLevelNode(int levelNode) {
         return poomsaeHistoryRepository.countPoomsaeHistoryByLevelNode(levelNode);
+    }
+
+    public List<PoomsaeHistoryDTO> getAllPoomsaeHistoryByIdTournament(String idTournament) throws IdInvalidException {
+        return poomsaeHistoryRepository.findAllByIdTournament(
+                        UUID.fromString(idTournament))
+                .stream()
+                .map(PoomsaeHistoryMapper::poomsaeHistoryToPoomsaeHistoryDTO)
+                .toList();
     }
 }

@@ -4,8 +4,10 @@ import com.dat.backend_version_2.domain.training.Student;
 import com.dat.backend_version_2.dto.training.Student.StudentReq;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
+import com.dat.backend_version_2.redis.training.StudentRedisImpl;
 import com.dat.backend_version_2.service.training.StudentService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,8 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    private final StudentRedisImpl studentRedis;
+
     @PostMapping
     public ResponseEntity<StudentRes.PersonalInfo> createStudent(
             @Valid @RequestBody StudentReq.StudentInfo studentInfo) throws IdInvalidException {
@@ -36,9 +40,14 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentRes.PersonalAcademicInfo>> getAllStudents() {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(studentService.getAllStudents());
+    public ResponseEntity<List<StudentRes.PersonalAcademicInfo>> getAllStudents()
+            throws JsonProcessingException {
+        List<StudentRes.PersonalAcademicInfo> students = studentRedis.getAllStudents();
+        if (students == null) {
+            students = studentService.getAllStudents();
+            studentRedis.saveAllStudents(students);
+        }
+        return ResponseEntity.ok(students);
     }
 
     @GetMapping("/branch/{idBranch}")
@@ -50,8 +59,14 @@ public class StudentController {
 
     @GetMapping("/class-session/{idClassSession}")
     public ResponseEntity<List<StudentRes.PersonalAcademicInfo>> getStudentByClassSession(
-            @PathVariable String idClassSession) throws IdInvalidException {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(studentService.getStudentsByIdClassSession(idClassSession));
+            @PathVariable String idClassSession) throws IdInvalidException, JsonProcessingException {
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(studentService.getStudentsByIdClassSession(idClassSession));
+        List<StudentRes.PersonalAcademicInfo> students = studentRedis.getStudentsByIdClassSession(idClassSession);
+        if (students == null) {
+            students = studentService.getStudentsByIdClassSession(idClassSession);
+            studentRedis.saveStudentsByIdClassSession(idClassSession, students);
+        }
+        return ResponseEntity.ok(students);
     }
 }

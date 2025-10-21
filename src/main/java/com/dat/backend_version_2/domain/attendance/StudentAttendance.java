@@ -17,7 +17,11 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "StudentAttendance", schema = "attendance")
+@Table(name = "StudentAttendance", schema = "attendance",
+        indexes = {
+            @Index(name = "idx_class_session", columnList = "class_session")
+        }
+)
 public class StudentAttendance extends BaseAttendance {
     @Id
     @GeneratedValue

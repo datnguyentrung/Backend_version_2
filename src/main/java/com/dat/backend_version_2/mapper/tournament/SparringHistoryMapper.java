@@ -15,7 +15,7 @@ public class SparringHistoryMapper {
         return dto;
     }
 
-    private static SparringHistoryDTO.ReferenceInfo sparringHistoryToReferenceInfo(SparringHistory sparringHistory) {
+    public static SparringHistoryDTO.ReferenceInfo sparringHistoryToReferenceInfo(SparringHistory sparringHistory) {
         if (sparringHistory == null) return null;
 
         var referenceInfo = new SparringHistoryDTO.ReferenceInfo();
@@ -30,12 +30,30 @@ public class SparringHistoryMapper {
             referenceInfo.setSparringCombination(
                     combination != null ? String.valueOf(combination.getIdSparringCombination()) : null
             );
+            referenceInfo.setSparringCategory(sparringHistoryToSparringCategory(sparringHistory));
         }
 
         return referenceInfo;
     }
 
-    private static SparringHistoryDTO.NodeInfo sparringHistoryToNodeInfo(SparringHistory sparringHistory) {
+    public static SparringHistoryDTO.SparringCategory sparringHistoryToSparringCategory(SparringHistory sparringHistory) {
+        if (sparringHistory == null) return null;
+
+        var combinationCategory = new SparringHistoryDTO.SparringCategory();
+        var sparringList = sparringHistory.getSparringList();
+
+        if (sparringList != null) {
+            var combination = sparringList.getSparringCombination();
+            if (combination != null) {
+                combinationCategory.setAgeGroupName(combination.getAgeGroup().getAgeGroupName());
+                combinationCategory.setGender(combination.getGender());
+                combinationCategory.setWeightClass(combination.getSparringContent().getWeightClass());
+            }
+        }
+        return combinationCategory;
+    }
+
+    public static SparringHistoryDTO.NodeInfo sparringHistoryToNodeInfo(SparringHistory sparringHistory) {
         if (sparringHistory == null) return null;
         SparringHistoryDTO.NodeInfo nodeInfo = new SparringHistoryDTO.NodeInfo();
         nodeInfo.setTargetNode(sparringHistory.getTargetNode());

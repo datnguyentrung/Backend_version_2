@@ -2,7 +2,9 @@ package com.dat.backend_version_2.controller.training;
 
 import com.dat.backend_version_2.domain.training.Branch;
 import com.dat.backend_version_2.dto.training.Branch.BranchReq;
+import com.dat.backend_version_2.redis.training.BranchRedisImpl;
 import com.dat.backend_version_2.service.training.BranchService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BranchController {
     private final BranchService branchService;
+    private final BranchRedisImpl branchRedis;
 
     @PostMapping
     public ResponseEntity<Branch> createBranch(@RequestBody BranchReq.BranchInfo branchReq) {
@@ -27,8 +30,14 @@ public class BranchController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Branch>> getAllBranches() {
-        List<Branch> branches = branchService.getAllBranches();
+    public ResponseEntity<List<Branch>> getAllBranches() throws JsonProcessingException {
+        List<Branch> branches = branchRedis.getAllBranches();
+
+        if (branches == null) {
+            branches = branchService.getAllBranches();
+            branchRedis.saveAllBranches(branches);
+        }
+
         return ResponseEntity.ok(branches);
     }
 }

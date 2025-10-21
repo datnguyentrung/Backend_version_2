@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.service.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
+import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.dat.backend_version_2.repository.tournament.Poomsae.PoomsaeCombinationRepository;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,16 @@ public class PoomsaeCombinationService {
         PoomsaeCombination combination = getCombinationById(id);
         combination.setIsActive(isActive);
         poomsaeCombinationRepository.save(combination);
+    }
+
+    @Transactional
+    public void changePoomsaeMode(List<String> ids, PoomsaeMode mode) {
+        List<PoomsaeCombination> combinations = poomsaeCombinationRepository.findAllById(
+                ids.stream().map(UUID::fromString).toList()
+        );
+        for (PoomsaeCombination combination : combinations) {
+            combination.setPoomsaeMode(mode);
+        }
+        poomsaeCombinationRepository.saveAll(combinations);
     }
 }

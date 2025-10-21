@@ -2,6 +2,7 @@ package com.dat.backend_version_2.domain.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.AgeGroup;
 import com.dat.backend_version_2.domain.tournament.BeltGroup;
+import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,4 +39,7 @@ public class PoomsaeCombination {
     private BeltGroup beltGroup;
 
     private Boolean isActive = false;
+
+    @Enumerated(EnumType.STRING)
+    private PoomsaeMode poomsaeMode = PoomsaeMode.ELIMINATION;
 }

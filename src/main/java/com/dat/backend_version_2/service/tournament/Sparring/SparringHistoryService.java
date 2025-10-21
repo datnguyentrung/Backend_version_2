@@ -212,4 +212,13 @@ public class SparringHistoryService {
         // 7️⃣ Xóa bản ghi gốc
         sparringHistoryRepository.delete(sparringHistory);
     }
+
+    public List<SparringHistoryDTO> getAllSparringHistoryByIdTournament(
+            String idTournament) throws IdInvalidException {
+        return sparringHistoryRepository.findAllByIdTournament(
+                        UUID.fromString(idTournament))
+                .stream()
+                .map(SparringHistoryMapper::sparringHistoryToSparringHistoryDTO)
+                .toList();
+    }
 }

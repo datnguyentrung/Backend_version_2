@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.mapper.authz;
 
 import com.dat.backend_version_2.domain.authz.Feature;
+import com.dat.backend_version_2.domain.authz.FeatureRoles;
 import com.dat.backend_version_2.dto.authz.Feature.FeatureReq;
 import com.dat.backend_version_2.dto.authz.Feature.FeatureRes;
 
@@ -28,7 +29,7 @@ public class FeatureMapper {
         if (feature.getFeatureRoles() != null) {
             basicInfo.setRoles(
                     feature.getFeatureRoles().stream()
-                            .map(fr -> fr.getRole().getIdRole()) // lấy roleName hoặc idRole
+                            .map(FeatureRoles::getIdRole) // lấy roleName hoặc idRole
                             .collect(Collectors.toList())
             );
         } else {

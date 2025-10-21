@@ -35,4 +35,16 @@ public interface SparringHistoryRepository extends JpaRepository<SparringHistory
             @Param("targetNode") Integer targetNode,
             @Param("idSparringCombination") UUID idSparringCombination
     );
+
+    @Query("""
+            SELECT DISTINCT sh
+                FROM SparringHistory sh
+                    JOIN FETCH sh.sparringList sl
+                    JOIN FETCH sl.tournament t
+                    JOIN FETCH sl.student s
+                    JOIN FETCH sl.branch b
+                    JOIN FETCH sl.sparringCombination sc
+                WHERE t.idTournament = :idTournament
+            """)
+    List<SparringHistory> findAllByIdTournament(UUID idTournament);
 }

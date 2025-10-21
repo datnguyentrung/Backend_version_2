@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -37,4 +38,32 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
     );
 
     Integer countPoomsaeHistoryByLevelNode(Integer levelNode);
+
+    @Query("""
+            SELECT DISTINCT ph
+                FROM PoomsaeHistory ph
+                    JOIN FETCH ph.poomsaeList pl
+                    JOIN FETCH pl.tournament t
+                    JOIN FETCH pl.student s
+                    JOIN FETCH pl.branch b
+                    JOIN FETCH pl.poomsaeCombination pc
+                WHERE t.idTournament = :idTournament
+            """)
+    List<PoomsaeHistory> findAllByIdTournament(@Param("idTournament") UUID idTournament);
+
+    @Query("""
+                SELECT DISTINCT ph
+                FROM PoomsaeHistory ph
+                    JOIN FETCH ph.poomsaeList pl
+                    JOIN FETCH pl.student s
+                    JOIN FETCH pl.poomsaeCombination pc
+                WHERE pc.idPoomsaeCombination = :idPoomsaeCombination
+                    AND ph.levelNode = :levelNode
+                    AND ph.sourceNode = :sourceNode
+            """)
+    Optional<PoomsaeHistory> findByIdPoomsaeCombinationAndLevelNodeAndSourceNode(
+            @Param("idPoomsaeCombination") UUID idPoomsaeCombination,
+            @Param("levelNode") Integer levelNode,
+            @Param("sourceNode") Integer sourceNode
+    );
 }

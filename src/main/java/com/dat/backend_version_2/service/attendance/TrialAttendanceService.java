@@ -65,7 +65,6 @@ public class TrialAttendanceService {
     }
 
     public List<AttendanceDTO> getCurrentTrialAttendance() {
-        System.out.println(LocalDate.now());
         return trialAttendanceRepository.findAllWithRegistrationAndClassSessionByAttendanceDate(LocalDate.now())
                 .stream()
                 .map(TrialAttendanceMapper::trialAttendanceToAttendanceDTO)

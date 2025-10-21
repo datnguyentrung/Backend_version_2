@@ -1,9 +1,11 @@
 package com.dat.backend_version_2.controller.attendance;
 
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceRes;
+import com.dat.backend_version_2.redis.attendance.CoachAttendanceRedisImpl;
 import com.dat.backend_version_2.service.attendance.CoachAttendanceService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CoachAttendanceController {
     private final CoachAttendanceService coachAttendanceService;
+    private final CoachAttendanceRedisImpl coachAttendanceRedis;
 
     @PostMapping("/class-session/{idClassSession}")
     public ResponseEntity<String> createCoachAttendance(
@@ -33,9 +36,29 @@ public class CoachAttendanceController {
     public ResponseEntity<List<CoachAttendanceRes>> getCoachAttendanceByYearAndMonth(
             @PathVariable String idCoach,
             @RequestParam Integer year,
-            @RequestParam Integer month) throws UserNotFoundException {
-        return ResponseEntity.ok(
-                coachAttendanceService.getCoachAttendanceByIdCoachAndYearAndMonth(
-                        idCoach, year, month));
+            @RequestParam Integer month) throws UserNotFoundException, JsonProcessingException {
+        List<CoachAttendanceRes> coachAttendanceResList =
+                coachAttendanceRedis.getCoachAttendanceByIdCoachAndYearAndMonth(
+                        idCoach,
+                        year,
+                        month
+                );
+        if (coachAttendanceResList == null){
+            coachAttendanceResList =
+                    coachAttendanceService.getCoachAttendanceByIdCoachAndYearAndMonth(
+                            idCoach,
+                            year,
+                            month
+                    );
+            if (coachAttendanceResList != null){
+                coachAttendanceRedis.saveCoachAttendanceByIdCoachAndYearAndMonth(
+                        idCoach,
+                        year,
+                        month,
+                        coachAttendanceResList
+                );
+            }
+        }
+        return ResponseEntity.ok(coachAttendanceResList);
     }
 }

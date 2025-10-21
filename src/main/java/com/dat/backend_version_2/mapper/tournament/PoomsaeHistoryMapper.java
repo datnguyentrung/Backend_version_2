@@ -31,12 +31,26 @@ public class PoomsaeHistoryMapper {
             referenceInfo.setPoomsaeCombination(
                     combination != null ? String.valueOf(combination.getIdPoomsaeCombination()) : null
             );
+            referenceInfo.setPoomsaeCategory(poomsaeHistoryToPoomsaeCategory(poomsaeHistory));
         }
 
         return referenceInfo;
     }
 
-    private static PoomsaeHistoryDTO.NodeInfo poomsaeHistoryToNodeInfo(PoomsaeHistory poomsaeHistory) {
+    public static PoomsaeHistoryDTO.PoomsaeCategory poomsaeHistoryToPoomsaeCategory(PoomsaeHistory poomsaeHistory) {
+        if (poomsaeHistory == null) return null;
+        var poomsaeCategory = new PoomsaeHistoryDTO.PoomsaeCategory();
+        var poomsaeList = poomsaeHistory.getPoomsaeList();
+        if (poomsaeList != null) {
+            var combination = poomsaeList.getPoomsaeCombination();
+            poomsaeCategory.setAgeGroupName(combination.getAgeGroup().getAgeGroupName());
+            poomsaeCategory.setBeltGroupName(combination.getBeltGroup().getBeltGroupName());
+            poomsaeCategory.setContentName(combination.getPoomsaeContent().getContentName());
+        }
+        return poomsaeCategory;
+    }
+
+    public static PoomsaeHistoryDTO.NodeInfo poomsaeHistoryToNodeInfo(PoomsaeHistory poomsaeHistory) {
         if (poomsaeHistory == null) return null;
         PoomsaeHistoryDTO.NodeInfo nodeInfo = new PoomsaeHistoryDTO.NodeInfo();
         nodeInfo.setTargetNode(poomsaeHistory.getTargetNode());

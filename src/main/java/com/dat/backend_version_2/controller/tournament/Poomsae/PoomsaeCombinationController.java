@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.controller.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
+import com.dat.backend_version_2.dto.tournament.PoomsaeCombinationDTO;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeCombinationService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,23 @@ public class PoomsaeCombinationController {
             @RequestParam String idPoomsaeCombination) throws IdInvalidException {
         poomsaeCombinationService.changeActiveStatus(idPoomsaeCombination, activate);
         return ResponseEntity.ok("All combinations changed active status to " + activate);
+    }
+
+    @PatchMapping("/change-mode")
+    public ResponseEntity<String> changePoomsaeMode(
+            @RequestBody PoomsaeCombinationDTO.ChangePoomsaeModeRequest request) {
+        poomsaeCombinationService.changePoomsaeMode(request.getIdPoomsaeCombinations(), request.getPoomsaeMode());
+        return ResponseEntity.ok("Poomsae mode updated successfully.");
+    }
+
+    @GetMapping("/active-ids")
+    public ResponseEntity<List<String>> getAllActivePoomsaeCombinationIds() {
+        List<PoomsaeCombination> activeCombinations = poomsaeCombinationService.getAllCombinations().stream()
+                .filter(PoomsaeCombination::getIsActive)
+                .toList();
+        List<String> activeCombinationIds = activeCombinations.stream()
+                .map(combination -> combination.getIdPoomsaeCombination().toString())
+                .toList();
+        return ResponseEntity.ok(activeCombinationIds);
     }
 }
