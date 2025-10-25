@@ -8,6 +8,8 @@ import java.util.List;
 public interface CoachAttendanceRedis {
     void clear();
 
+    void deleteByKey(String key);
+
     List<CoachAttendanceRes> getCoachAttendanceByIdCoachAndYearAndMonth(
             String idCoach,
             Integer year,

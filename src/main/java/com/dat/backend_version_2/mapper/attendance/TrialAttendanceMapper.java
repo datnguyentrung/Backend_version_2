@@ -27,7 +27,6 @@ public class TrialAttendanceMapper {
             return null;
         }
         AttendanceDTO attendance = new AttendanceDTO();
-        attendance.setIdAttendance(String.valueOf(trialAttendance.getIdAttendance()));
         attendance.setIdStudent(String.valueOf(trialAttendance.getRegistration().getIdRegistration()));
         attendance.setStudentName(trialAttendance.getRegistration().getName());
         attendance.setIdClassSession(trialAttendance.getClassSession().getIdClassSession());

@@ -1,27 +1,21 @@
 package com.dat.backend_version_2.dto.attendance;
 
-import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.domain.training.Coach;
 import com.dat.backend_version_2.enums.attendance.AttendanceStatus;
 import com.dat.backend_version_2.enums.attendance.EvaluationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @MappedSuperclass
 public abstract class BaseAttendance {
-    private LocalDate attendanceDate = LocalDate.now();
-
-    @ManyToOne
-    @JoinColumn(name = "class_session")
-    private ClassSession classSession;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AttendanceStatus attendanceStatus = AttendanceStatus.V;
+
     private LocalDateTime attendanceTime;
 
     @ManyToOne

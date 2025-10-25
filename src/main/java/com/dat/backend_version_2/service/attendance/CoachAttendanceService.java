@@ -3,6 +3,7 @@ package com.dat.backend_version_2.service.attendance;
 import com.dat.backend_version_2.domain.attendance.CoachAttendance;
 import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.domain.training.Coach;
+import com.dat.backend_version_2.dto.attendance.CoachAttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceRes;
 import com.dat.backend_version_2.mapper.attendance.CoachAttendanceMapper;
 import com.dat.backend_version_2.repository.attendance.CoachAttendanceRepository;
@@ -28,13 +29,18 @@ public class CoachAttendanceService {
     private final ClassSessionService classSessionService;
 
     @Transactional
-    public void markCoachAttendance(String idUser, String idClassSession) throws IdInvalidException {
-        Coach coach = coachService.getCoachById(idUser);
-        ClassSession classSession = classSessionService.getClassSessionById(idClassSession);
+    public void markCoachAttendance(CoachAttendanceDTO.CreateRequest request) throws IdInvalidException {
+        Coach coach = coachService.getCoachByIdAccount(request.getIdAccount());
+        ClassSession classSession = classSessionService.getClassSessionById(request.getIdClassSession());
 
         CoachAttendance coachAttendance = new CoachAttendance();
         coachAttendance.setCoach(coach);
         coachAttendance.setClassSession(classSession);
+        coachAttendance.setCreatedAt(request.getCreatedAt());
+
+        if (request.getFileName() != null) {
+            coachAttendance.setImageUrl(request.getFileName());
+        }
 
         coachAttendanceRepository.save(coachAttendance);
     }
@@ -46,8 +52,8 @@ public class CoachAttendanceService {
         List<Integer>months = Collections.singletonList(month);
 
         Specification<CoachAttendance> spec =
-                DateSpecification.<CoachAttendance>hasMonthOfDateIn(months, "attendanceDate")
-                        .and(DateSpecification.hasYearOfDate(year, "attendanceDate"))
+                DateSpecification.<CoachAttendance>hasMonthOfDateIn(months, "createdAt")
+                        .and(DateSpecification.hasYearOfDate(year, "createdAt"))
                         .and(FieldSpecification.hasFieldEqual("coach", coach));
 
         List<CoachAttendance>coachAttendances = coachAttendanceRepository.findAll(spec);

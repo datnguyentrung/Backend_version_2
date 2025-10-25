@@ -28,9 +28,11 @@ public class CoachAttendance {
     @JoinColumn(name = "coach_id_user")
     private Coach coach;
 
-    private LocalDateTime attendanceDate = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "class_session")
     private ClassSession classSession;
+
+    private String imageUrl;
 }

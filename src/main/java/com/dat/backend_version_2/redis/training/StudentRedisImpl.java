@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StudentRedisImpl implements StudentRedis {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -27,10 +29,16 @@ public class StudentRedisImpl implements StudentRedis {
     public List<StudentRes.PersonalAcademicInfo> getAllStudents()
     throws JsonProcessingException {
         String key = "students:all";
+        log.debug("Attempting to get all students from cache with key: {}", key);
+
         String json = (String) redisTemplate.opsForValue().get(key);
-        return json != null ?
-                redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {})
-                : null;
+        if (json != null) {
+            log.debug("Cache HIT for all students");
+            return redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {});
+        } else {
+            log.debug("Cache MISS for all students");
+            return null;
+        }
     }
 
     @Override
@@ -38,28 +46,40 @@ public class StudentRedisImpl implements StudentRedis {
             String idClassSession
     ) throws JsonProcessingException{
         String key = getKeyClassSession(idClassSession);
+        log.debug("Attempting to get students from cache for class session: {} with key: {}", idClassSession, key);
+
+        // Kiểm tra xem key có tồn tại không
+        Boolean keyExists = redisTemplate.hasKey(key);
+        log.debug("Key exists in Redis: {}", keyExists);
+
         String json = (String) redisTemplate.opsForValue().get(key);
-        return json != null ?
-                redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {})
-                : null;
+        if (json != null) {
+            log.info("Cache HIT for class session: {}", idClassSession);
+            return redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {});
+        } else {
+            log.info("Cache MISS for class session: {}", idClassSession);
+            return null;
+        }
     }
 
     @Override
     public void clear() {
+        log.info("Clearing all cache data");
         var connectionFactory = redisTemplate.getConnectionFactory();
         if (connectionFactory != null) {
             try (var connection = connectionFactory.getConnection()) {
-                connection.serverCommands().flushDb(); // chỉ xóa DB hiện tại
+                connection.serverCommands().flushDb();
+                log.info("Cache cleared successfully");
             }
         }
     }
 
     @Override
-    // Save all students to Redis
     public void saveAllStudents(List<StudentRes.PersonalAcademicInfo> students) throws JsonProcessingException {
         String key = "students:all";
         String json = redisObjectMapper.writeValueAsString(students);
         redisTemplate.opsForValue().set(key, json);
+        log.debug("Saved all students to cache with key: {}, count: {}", key, students.size());
     }
 
     @Override
@@ -70,7 +90,11 @@ public class StudentRedisImpl implements StudentRedis {
         String key = getKeyClassSession(idClassSession);
         String json = redisObjectMapper.writeValueAsString(students);
 
-        // Lưu kèm TTL (ví dụ: 1 ngày + random)
-        redisTemplate.opsForValue().set(key, json, cacheTtlConfig.randomOneDay());
+        // Lưu với TTL 1 ngày + random
+        var ttl = cacheTtlConfig.randomOneDay();
+        redisTemplate.opsForValue().set(key, json, ttl);
+
+        log.info("Saved students to cache for class session: {} with key: {}, count: {}, TTL: {} seconds",
+                idClassSession, key, students.size(), ttl.getSeconds());
     }
 }

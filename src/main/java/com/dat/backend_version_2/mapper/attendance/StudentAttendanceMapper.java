@@ -12,7 +12,6 @@ public class StudentAttendanceMapper {
             return null;
         }
         AttendanceDTO attendanceDTO = new AttendanceDTO();
-        attendanceDTO.setIdAttendance(String.valueOf(studentAttendance.getIdAttendance()));
         attendanceDTO.setIdStudent(String.valueOf(studentAttendance.getStudent().getIdAccount()));
         attendanceDTO.setIdClassSession(studentAttendance.getClassSession().getIdClassSession());
 

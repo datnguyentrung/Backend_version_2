@@ -9,6 +9,6 @@ import java.time.LocalDateTime;
 public class CoachAttendanceRes {
     private String name;
 
-    private LocalDateTime attendanceDate;
+    private LocalDateTime createdAt;
     private ClassSession classSession;
 }

@@ -4,15 +4,25 @@ spring:
     username: root
     password: 31102005
 
-#    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
-#    username: postgres.vrtckvdzbjlpjexfacqm
-#    password: 31102005
+    #    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    #    username: postgres.vrtckvdzbjlpjexfacqm
+    #    password: 31102005
     driver-class-name: org.postgresql.Driver
 
   data:
     redis:
+      #      host: redis-14877.c329.us-east4-1.gce.redns.redis-cloud.com
+      #      port: 14877
+      #      username: default
+      #      password: JnfYrJzEHAkAUoa5ObdLsm86ei7Ydf2K
+      #      ssl:
+      #        enabled: true
+      #      repositories:
+      #        enabled: true
       host: localhost
       port: 6379
+      repositories:
+        enabled: true
 
   jpa:
     hibernate:
@@ -20,6 +30,8 @@ spring:
     database: postgresql
     show-sql: true
     open-in-view: true              # ✅ Tắt open-in-view để tránh giữ connection lâu
+    repositories:
+      enabled: true
 
   servlet:
     multipart:
@@ -29,10 +41,20 @@ spring:
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
+# Cấu hình logging để giảm warning logs
 logging:
   level:
+    # Giảm log từ Spring Data khi scan repository, chỉ hiển thị ERROR thật sự
+    # Tránh các WARN/INFO quá verbose từ RepositoryConfigurationExtensionSupport
+    org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport: ERROR
+
+    # Bật DEBUG cho Spring Security
+    # Useful để debug authentication, authorization, JWT, login flow
     org.springframework.security: DEBUG
-    com.zaxxer.hikari: INFO          # ✅ Thêm log để xem trạng thái pool
+
+    # Hiển thị trạng thái HikariCP connection pool ở mức INFO
+    # Không quá verbose như DEBUG, vẫn thấy kết nối DB mở/close
+    com.zaxxer.hikari: INFO
 
 jwt:
   base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
@@ -47,3 +69,11 @@ cache:
     one-day-seconds: 86400       # 1 ngày
     one-week-seconds: 604800     # 1 tuần
     one-month-seconds: 2592000   # 30 ngày
+
+bytescale:
+  account-id: kW2K8X8
+  api-key: secret_kW2K8X8GRraEcyfnd62vGLVoCRgJ
+
+python:
+  api:
+    recognize: http://localhost:8000/arcface-ai/recognize

@@ -17,12 +17,22 @@ public class CoachAttendanceRedisImpl implements CoachAttendanceRedis{
     private final ObjectMapper redisObjectMapper;
     private final CacheTtlConfig cacheTtlConfig;
 
-    private String getKeyByIdCoachAndYearAndMonth(
+    public String getKeyByIdCoachAndYearAndMonth(
             String idCoach,
             Integer year,
             Integer month
     ) {
         return "coach-attendance:" + idCoach + ":" + year + ":" + month;
+    }
+
+    @Override
+    public void deleteByKey(String key) {
+        Boolean result = redisTemplate.delete(key);
+        if (result) {
+            System.out.println("✅ Đã xóa cache Redis key: " + key);
+        } else {
+            System.out.println("⚠️ Không tìm thấy hoặc không thể xóa key: " + key);
+        }
     }
 
     @Override

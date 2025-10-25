@@ -7,7 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.TimeZone;
 
 @SpringBootApplication(
-        exclude = org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        exclude = {
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
+        }
 )
 public class BackendVersion2Application {
 

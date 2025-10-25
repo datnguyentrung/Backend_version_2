@@ -10,7 +10,7 @@ public class CoachAttendanceMapper {
         }
         CoachAttendanceRes res = new CoachAttendanceRes();
         res.setName(coachAttendance.getCoach().getName());
-        res.setAttendanceDate(coachAttendance.getAttendanceDate());
+        res.setCreatedAt(coachAttendance.getCreatedAt());
         res.setClassSession(coachAttendance.getClassSession());
         return res;
     }
