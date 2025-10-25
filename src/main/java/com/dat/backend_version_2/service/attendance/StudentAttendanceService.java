@@ -43,13 +43,25 @@ public class StudentAttendanceService {
     }
 
     public boolean hasAttendance(
-            Student student, ClassSession classSession, LocalDate attendanceDate){
+            Student student, ClassSession classSession, LocalDate attendanceDate) {
         return studentAttendanceRepository.existsByStudentAndClassSessionAndAttendanceDate(student, classSession, attendanceDate);
     }
 
     // Điểm danh theo mã lớp học
     @Transactional
-    public void attendanceByClassSession(String idClassSession) throws IdInvalidException {
+    public void createAttendancesByClassSessionAndDate(
+            String idClassSession,
+            LocalDate attendanceDate,
+            String idCoachAccount
+    ) throws IdInvalidException {
+        Coach coach = coachService.getCoachByIdAccount(idCoachAccount);
+        if (!coach.getIsActive()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Coach no longer have permission to use this feature"
+            );
+        }
+
         ClassSession classSession = classSessionService
                 .getClassSessionById(idClassSession);
 
@@ -60,7 +72,7 @@ public class StudentAttendanceService {
         List<Student> students = studentClassSessionService
                 .getStudentsByClassSession(idClassSession);
 
-        List<AttendanceDTO> attendanceDTOS = getCurrentAttendanceByClassSession(idClassSession);
+        List<AttendanceDTO> attendanceDTOS = getAttendanceByClassSessionAndDate(idClassSession, attendanceDate);
 
         Set<String> attendanceSet = new HashSet<>(
                 attendanceDTOS.stream().map(AttendanceDTO::getIdStudent).toList()
@@ -70,8 +82,13 @@ public class StudentAttendanceService {
                 .filter(student -> !attendanceSet.contains(student.getIdAccount()))
                 .map(student -> {
                     StudentAttendance attendance = new StudentAttendance();
+                    attendance.setIdUser(student.getIdUser());
+                    attendance.setIdClassSession(idClassSession);
+                    attendance.setAttendanceDate(attendanceDate);
                     attendance.setStudent(student);
                     attendance.setClassSession(classSession);
+
+                    attendance.setAttendanceCoach(coach);
                     return attendance;
                 })
                 .toList();
@@ -81,15 +98,10 @@ public class StudentAttendanceService {
     }
 
     // Lấy danh sách điểm danh ở 1 lớp học trong ngày
-    public List<AttendanceDTO> getCurrentAttendanceByClassSession(String idClassSession) throws IdInvalidException {
-        ClassSession classSession = classSessionService
-                .getClassSessionById(idClassSession);
+    public List<AttendanceDTO> getAttendanceByClassSessionAndDate(String idClassSession, LocalDate attendanceDate) throws IdInvalidException {
 
-        if (!classSession.getIsActive()) {
-            throw new RuntimeException("ClassSession is not active");
-        }
 
-        return studentAttendanceRepository.findByIdClassSessionAndAttendanceDate(idClassSession, LocalDate.now()).stream()
+        return studentAttendanceRepository.findByIdClassSessionAndAttendanceDate(idClassSession, attendanceDate).stream()
                 .map(StudentAttendanceMapper::studentAttendanceToAttendanceDTO)
                 .toList();
     }
@@ -111,7 +123,7 @@ public class StudentAttendanceService {
 
         studentAttendance.setAttendanceStatus(markAttendance.getAttendanceStatus());
         if (markAttendance.getAttendanceStatus() == AttendanceStatus.V ||
-                markAttendance.getAttendanceStatus() == AttendanceStatus.P){
+                markAttendance.getAttendanceStatus() == AttendanceStatus.P) {
             studentAttendance.setEvaluationCoach(null);
             studentAttendance.setEvaluationStatus(null);
         } else {
@@ -128,7 +140,7 @@ public class StudentAttendanceService {
     ) throws IdInvalidException, ResponseStatusException {
         StudentAttendance studentAttendance = getStudentAttendanceById(markEvaluation.getIdAttendance());
 
-        if (studentAttendance.getAttendanceStatus()== AttendanceStatus.V || studentAttendance.getAttendanceStatus()== AttendanceStatus.P) {
+        if (studentAttendance.getAttendanceStatus() == AttendanceStatus.V || studentAttendance.getAttendanceStatus() == AttendanceStatus.P) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "EvaluationStatus is not allowed when AttendanceStatus is V or P"

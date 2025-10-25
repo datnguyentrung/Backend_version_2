@@ -1,7 +1,9 @@
 package com.dat.backend_version_2.controller.attendance;
 
+import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.service.attendance.StudentAttendanceService;
+import com.dat.backend_version_2.service.training.ClassSessionService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StudentAttendanceController {
     private final StudentAttendanceService studentAttendanceService;
+    private final ClassSessionService classSessionService;
 
     @PostMapping
     public ResponseEntity<String> createAttendance(
@@ -32,6 +36,7 @@ public class StudentAttendanceController {
         );
     }
 
+    // Sửa điểm danh
     @PatchMapping("/attendance")
     public ResponseEntity<String> markAttendance(
             @RequestBody AttendanceDTO.MarkAttendance markAttendance,
@@ -44,6 +49,7 @@ public class StudentAttendanceController {
         );
     }
 
+    // Sửa đánh giá
     @PatchMapping("/evaluation")
     public ResponseEntity<String> markEvaluation(
             @RequestBody AttendanceDTO.MarkEvaluation markEvaluation,
@@ -56,11 +62,16 @@ public class StudentAttendanceController {
         );
     }
 
-    @PostMapping("/class-session/{idClassSession}")
+    // Điểm danh theo mã buổi học và ngày điểm danh
+    @PostMapping("/class-session")
     public ResponseEntity<Map<String, Object>> attendanceByClassSession(
-            @PathVariable String idClassSession) {
+            @RequestParam String idClassSession,
+            @RequestParam LocalDate attendanceDate,
+            Authentication authentication) throws ResponseStatusException {
         try {
-            studentAttendanceService.attendanceByClassSession(idClassSession);
+            String idCoachAccount = authentication.getName();
+
+            studentAttendanceService.createAttendancesByClassSessionAndDate(idClassSession, attendanceDate, idCoachAccount);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -79,9 +90,20 @@ public class StudentAttendanceController {
         }
     }
 
-    @GetMapping("/class-session/{idClassSession}")
-    public ResponseEntity<List<AttendanceDTO>> getAttendanceByClassSession(@PathVariable String idClassSession) throws IdInvalidException {
+    // Lấy danh sách điểm danh ở 1 lớp học trong ngày
+    @GetMapping("/class-session")
+    public ResponseEntity<List<AttendanceDTO>> getAttendanceByClassSession(
+            @RequestParam String idClassSession,
+            @RequestParam LocalDate attendanceDate) throws IdInvalidException {
+
+        ClassSession classSession = classSessionService
+                .getClassSessionById(idClassSession);
+
+        if (!classSession.getIsActive()) {
+            throw new RuntimeException("ClassSession is not active");
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(
-                studentAttendanceService.getCurrentAttendanceByClassSession(idClassSession));
+                studentAttendanceService.getAttendanceByClassSessionAndDate(idClassSession, attendanceDate));
     }
 }

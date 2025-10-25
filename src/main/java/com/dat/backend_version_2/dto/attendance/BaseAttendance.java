@@ -16,13 +16,14 @@ public abstract class BaseAttendance {
     @Column(nullable = false)
     private AttendanceStatus attendanceStatus = AttendanceStatus.V;
 
-    private LocalDateTime attendanceTime;
+    private LocalDateTime attendanceTime = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "attendance_coach_id_user")
     private Coach attendanceCoach;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
     private EvaluationStatus evaluationStatus;
 
     @ManyToOne
