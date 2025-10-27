@@ -2,9 +2,11 @@ package com.dat.backend_version_2.controller.attendance;
 
 import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
+import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
 import com.dat.backend_version_2.service.attendance.StudentAttendanceService;
 import com.dat.backend_version_2.service.training.ClassSessionService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,39 +28,39 @@ public class StudentAttendanceController {
 
     @PostMapping
     public ResponseEntity<String> createAttendance(
-            @RequestBody AttendanceDTO attendanceDTO,
-            Authentication authentication) throws IdInvalidException {
+            @RequestBody StudentAttendanceDTO.CreateStudentAttendance attendanceDTO,
+            Authentication authentication) throws IdInvalidException, JsonProcessingException {
         String idAccount = authentication.getName();
 
         studentAttendanceService.createStudentAttendance(attendanceDTO, idAccount);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                "Attendance created successfully for ID: " + attendanceDTO.getIdStudent()
+                "Attendance created successfully for key: " + attendanceDTO.getAttendanceKey()
         );
     }
 
     // Sửa điểm danh
     @PatchMapping("/attendance")
     public ResponseEntity<String> markAttendance(
-            @RequestBody AttendanceDTO.MarkAttendance markAttendance,
+            @RequestBody StudentAttendanceDTO.StudentMarkAttendance markAttendance,
             Authentication authentication) throws IdInvalidException, ResponseStatusException {
         String idAccount = authentication.getName();
 
         studentAttendanceService.markAttendance(markAttendance, idAccount);
         return ResponseEntity.ok(
-                "Attendance updated successfully for ID: " + markAttendance.getIdAttendance()
+                "Attendance updated successfully for key: " + markAttendance.getAttendanceKey()
         );
     }
 
     // Sửa đánh giá
     @PatchMapping("/evaluation")
     public ResponseEntity<String> markEvaluation(
-            @RequestBody AttendanceDTO.MarkEvaluation markEvaluation,
+            @RequestBody StudentAttendanceDTO.StudentMarkEvaluation markEvaluation,
             Authentication authentication) throws IdInvalidException, ResponseStatusException {
         String idAccount = authentication.getName();
 
         studentAttendanceService.markEvaluation(markEvaluation, idAccount);
         return ResponseEntity.ok(
-                "Evaluation updated successfully for ID: " + markEvaluation.getIdAttendance()
+                "Evaluation updated successfully for key: " + markEvaluation.getAttendanceKey()
         );
     }
 
@@ -71,7 +73,8 @@ public class StudentAttendanceController {
         try {
             String idCoachAccount = authentication.getName();
 
-            studentAttendanceService.createAttendancesByClassSessionAndDate(idClassSession, attendanceDate, idCoachAccount);
+            studentAttendanceService.createAttendancesByClassSessionAndDate(
+                    idClassSession, attendanceDate, idCoachAccount);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -87,14 +90,16 @@ public class StudentAttendanceController {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
     // Lấy danh sách điểm danh ở 1 lớp học trong ngày
     @GetMapping("/class-session")
-    public ResponseEntity<List<AttendanceDTO>> getAttendanceByClassSession(
+    public ResponseEntity<List<StudentAttendanceDTO.StudentAttendanceDetail>> getAttendanceByClassSession(
             @RequestParam String idClassSession,
-            @RequestParam LocalDate attendanceDate) throws IdInvalidException {
+            @RequestParam LocalDate attendanceDate) throws IdInvalidException, JsonProcessingException {
 
         ClassSession classSession = classSessionService
                 .getClassSessionById(idClassSession);

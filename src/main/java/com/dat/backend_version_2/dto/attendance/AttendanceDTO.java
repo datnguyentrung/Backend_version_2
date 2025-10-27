@@ -12,13 +12,9 @@ import java.util.UUID;
 
 @Data
 public class AttendanceDTO {
-    private String idStudent;
-    private String studentName;
-    private String idClassSession;
-    private AttendanceInfo attendanceInfo;
-
     @Data
     public static class AttendanceInfo{
+        private String idAccount;
         private LocalDate attendanceDate;
         private AttendanceStatus attendanceStatus;
         private EvaluationStatus evaluationStatus;
@@ -26,15 +22,12 @@ public class AttendanceDTO {
     }
 
     @Data
-    public static class MarkAttendance{
-        private String idAttendance;
-        private AttendanceStatus attendanceStatus;
-    }
-
-    @Data
-    public static class MarkEvaluation{
-        private String idAttendance;
-        private EvaluationStatus evaluationStatus;
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CoachAttendanceKey implements Serializable {
+        private UUID idUser;
+        private String idClassSession;
+        private LocalDate attendanceDate;
     }
 
     @Data

@@ -78,7 +78,8 @@ public class StudentRedisImpl implements StudentRedis {
     public void saveAllStudents(List<StudentRes.PersonalAcademicInfo> students) throws JsonProcessingException {
         String key = "students:all";
         String json = redisObjectMapper.writeValueAsString(students);
-        redisTemplate.opsForValue().set(key, json);
+        var ttl = cacheTtlConfig.getOneMonthSeconds();
+        redisTemplate.opsForValue().set(key, json, ttl);
         log.debug("Saved all students to cache with key: {}, count: {}", key, students.size());
     }
 

@@ -3,6 +3,7 @@ package com.dat.backend_version_2.service.training;
 import com.dat.backend_version_2.domain.training.Coach;
 import com.dat.backend_version_2.dto.training.Coach.CoachReq;
 import com.dat.backend_version_2.mapper.training.CoachMapper;
+import com.dat.backend_version_2.redis.training.CoachRedisImpl;
 import com.dat.backend_version_2.repository.training.CoachRepository;
 import com.dat.backend_version_2.service.authentication.UsersService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class CoachService {
     private final CoachRepository coachRepository;
     private final UsersService usersService;
+    private final CoachRedisImpl coachRedis;
 
     public Coach createCoach(CoachReq.CoachInfo coachReq) {
         Coach coach = new Coach();
@@ -35,7 +37,13 @@ public class CoachService {
     }
 
     public Coach getCoachByIdAccount(String idAccount) throws UserNotFoundException {
-        return coachRepository.findByIdAccount(idAccount)
-                .orElseThrow(() -> new UserNotFoundException("Coach not found with id: " + idAccount));
+        Coach coach = coachRedis.getCoachByIdAccount(idAccount);
+
+        if (coach == null) {
+            coach = coachRepository.findByIdAccount(idAccount)
+                    .orElseThrow(() -> new UserNotFoundException("Coach not found with id: " + idAccount));
+            coachRedis.saveCoachByIdAccount(idAccount, coach);
+        }
+        return coach;
     }
 }

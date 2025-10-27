@@ -32,7 +32,7 @@ public class StudentController {
      */
     @PostMapping
     public ResponseEntity<StudentRes.PersonalInfo> createStudent(
-            @Valid @RequestBody StudentReq.StudentInfo studentInfo) throws IdInvalidException {
+            @Valid @RequestBody StudentReq.StudentInfo studentInfo) throws IdInvalidException, JsonProcessingException {
         Student student = studentService.createStudent(studentInfo);
         StudentRes.PersonalInfo personalInfo = StudentMapper.studentToPersonalInfo(student);
 
@@ -62,7 +62,7 @@ public class StudentController {
      */
     @GetMapping("/branch/{idBranch}")
     public ResponseEntity<List<StudentRes.PersonalAcademicInfo>> getStudentByBranch(
-            @PathVariable Integer idBranch) throws IdInvalidException {
+            @PathVariable Integer idBranch) throws IdInvalidException, JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(studentService.getStudentsByIdBranch(idBranch));
     }

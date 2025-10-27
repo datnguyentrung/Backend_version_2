@@ -1,5 +1,6 @@
 package com.dat.backend_version_2.redis.training;
 
+import com.dat.backend_version_2.config.CacheTtlConfig;
 import com.dat.backend_version_2.domain.training.Branch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BranchRedisImpl implements BranchRedis {
     private final RedisTemplate<String, Object> redisTemplate;
-
+    private final CacheTtlConfig cacheTtlConfig;
     private final ObjectMapper redisObjectMapper;
 
     @Override
@@ -45,6 +46,29 @@ public class BranchRedisImpl implements BranchRedis {
         try {
             String json = redisObjectMapper.writeValueAsString(branches);
             redisTemplate.opsForValue().set(key, json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Branch getBranchById(int id) throws JsonProcessingException {
+        String key = "branch:" + id;
+        String json = (String) redisTemplate.opsForValue().get(key);
+        try {
+            return json != null ? redisObjectMapper.readValue(json, Branch.class) : null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void saveBranchById(int idBranch, Branch branch) throws JsonProcessingException {
+        String key = "branch:" + idBranch;
+        var ttl = cacheTtlConfig.getOneMonthSeconds();
+        try {
+            String json = redisObjectMapper.writeValueAsString(branch);
+            redisTemplate.opsForValue().set(key, json, ttl);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

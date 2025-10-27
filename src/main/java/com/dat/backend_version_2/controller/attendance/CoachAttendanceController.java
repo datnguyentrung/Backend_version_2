@@ -4,15 +4,18 @@ import com.dat.backend_version_2.dto.attendance.CoachAttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceRes;
 import com.dat.backend_version_2.redis.attendance.CoachAttendanceRedisImpl;
 import com.dat.backend_version_2.service.attendance.CoachAttendanceService;
+import com.dat.backend_version_2.util.ConverterUtils;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -35,13 +38,15 @@ public class CoachAttendanceController {
      */
     @PostMapping
     public ResponseEntity<String> createCoachAttendance(
-            @RequestBody CoachAttendanceDTO.CreateRequest createRequest) throws IdInvalidException {
+            @RequestBody CoachAttendanceDTO.CreateRequest createRequest) throws IdInvalidException, JsonProcessingException {
         coachAttendanceService.markCoachAttendance(createRequest);
+
+        LocalDate date = ConverterUtils.instantToLocalDate(createRequest.getCreatedAt());
 
         String key = coachAttendanceRedis.getKeyByIdCoachAndYearAndMonth(
                 createRequest.getIdAccount(),
-                createRequest.getCreatedAt().getYear(),
-                createRequest.getCreatedAt().getMonthValue());
+                date.getYear(),
+                date.getMonthValue());
 
         coachAttendanceRedis.deleteByKey(key);
 

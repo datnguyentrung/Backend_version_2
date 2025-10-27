@@ -3,6 +3,7 @@ package com.dat.backend_version_2.controller.registration;
 import com.dat.backend_version_2.dto.registration.RegistrationDTO;
 import com.dat.backend_version_2.service.registration.RegistrationService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class RegistrationController {
 
     @PostMapping("/update")
     public ResponseEntity<String> updateRegistration(
-            @RequestBody @Valid RegistrationDTO registrationDTO) throws IdInvalidException {
+            @RequestBody @Valid RegistrationDTO registrationDTO) throws IdInvalidException, JsonProcessingException {
         registrationService.updateRegistration(
                 registrationDTO.getIdRegistration(),
                 registrationDTO.getPersonalInfo()

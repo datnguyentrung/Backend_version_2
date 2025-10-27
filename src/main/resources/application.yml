@@ -55,6 +55,13 @@ logging:
     # Hiển thị trạng thái HikariCP connection pool ở mức INFO
     # Không quá verbose như DEBUG, vẫn thấy kết nối DB mở/close
     com.zaxxer.hikari: INFO
+#
+#    # Bật log chi tiết lỗi SQL khi transaction commit thất bại
+#    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: DEBUG
+#
+#    # Bật trace để thấy toàn bộ quá trình transaction (commit, rollback,…)
+#    org.springframework.orm.jpa.JpaTransactionManager: TRACE
+#    org.springframework.transaction: TRACE
 
 jwt:
   base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==

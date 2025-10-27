@@ -10,5 +10,9 @@ public interface BranchRedis {
 
     List<Branch> getAllBranches() throws JsonProcessingException;
 
+    Branch getBranchById(int id) throws JsonProcessingException;
+
+    void saveBranchById(int idBranch, Branch branch) throws JsonProcessingException;
+
     void saveAllBranches(List<Branch> branches) throws JsonProcessingException;
 }

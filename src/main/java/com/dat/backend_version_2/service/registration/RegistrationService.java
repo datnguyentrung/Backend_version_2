@@ -9,6 +9,7 @@ import com.dat.backend_version_2.repository.registration.RegistrationRepository;
 import com.dat.backend_version_2.service.training.BranchService;
 import com.dat.backend_version_2.service.training.StudentService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class RegistrationService {
         registrationRepository.save(registration);
     }
 
-    public void registerRegistration(RegistrationDTO registrationDTO) throws IdInvalidException {
+    public void registerRegistration(RegistrationDTO registrationDTO) throws IdInvalidException, JsonProcessingException {
         Registration registration = getRegistrationById(registrationDTO.getIdRegistration());
 
         Branch branch = branchService.getBranchById(registrationDTO.getRegistrationInfo().getIdBranch());
