@@ -1,26 +1,27 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/version_2
-    username: root
-    password: 31102005
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/version_2}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:31102005}
 
-    #    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
-    #    username: postgres.vrtckvdzbjlpjexfacqm
-    #    password: 31102005
     driver-class-name: org.postgresql.Driver
 
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 600000
+      connection-timeout: 20000
   data:
     redis:
-      #      host: redis-14877.c329.us-east4-1.gce.redns.redis-cloud.com
-      #      port: 14877
-      #      username: default
-      #      password: JnfYrJzEHAkAUoa5ObdLsm86ei7Ydf2K
-      #      ssl:
-      #        enabled: true
-      #      repositories:
-      #        enabled: true
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+
+      ssl:
+        enabled: false
+
       repositories:
         enabled: true
 
@@ -29,7 +30,7 @@ spring:
       ddl-auto: update
     database: postgresql
     show-sql: true
-    open-in-view: true              # ✅ Tắt open-in-view để tránh giữ connection lâu
+    open-in-view: true
     repositories:
       enabled: true
 
@@ -41,46 +42,29 @@ spring:
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
-# Cấu hình logging để giảm warning logs
 logging:
   level:
-    # Giảm log từ Spring Data khi scan repository, chỉ hiển thị ERROR thật sự
-    # Tránh các WARN/INFO quá verbose từ RepositoryConfigurationExtensionSupport
     org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport: ERROR
-
-    # Bật DEBUG cho Spring Security
-    # Useful để debug authentication, authorization, JWT, login flow
     org.springframework.security: DEBUG
-
-    # Hiển thị trạng thái HikariCP connection pool ở mức INFO
-    # Không quá verbose như DEBUG, vẫn thấy kết nối DB mở/close
     com.zaxxer.hikari: INFO
-#
-#    # Bật log chi tiết lỗi SQL khi transaction commit thất bại
-#    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: DEBUG
-#
-#    # Bật trace để thấy toàn bộ quá trình transaction (commit, rollback,…)
-#    org.springframework.orm.jpa.JpaTransactionManager: TRACE
-#    org.springframework.transaction: TRACE
 
 jwt:
-  base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
-  access-token-validity-in-seconds: 86400
-  refresh-token-validity-in-seconds: 8640000
+  base64-secret: ${JWT_BASE64_SECRET}
+  access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS}
+  refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS}
 
 password:
-  time_password_change_days: 30
+  time_password_change_days: ${TIME_PASSWORD_CHANGE_DAYS}
 
 cache:
   ttl:
-    one-day-seconds: 86400       # 1 ngày
-    one-week-seconds: 604800     # 1 tuần
-    one-month-seconds: 2592000   # 30 ngày
+    one-day-seconds: 86400
+    one-week-seconds: 604800
+    one-month-seconds: 2592000
 
 bytescale:
-  account-id: kW2K8X8
-  api-key: secret_kW2K8X8GRraEcyfnd62vGLVoCRgJ
+  account-id: ${BYTESCALE_ACCOUNT_ID}
+  api-key: ${BYTESCALE_API_KEY}
 
-python:
-  api:
-    recognize: http://localhost:8000/arcface-ai/recognize
+server:
+  port: ${PORT:8080}

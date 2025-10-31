@@ -18,6 +18,7 @@ public class StudentAttendanceDTO {
     public static class StudentMarkEvaluation{
         private AttendanceDTO.StudentAttendanceKey attendanceKey;
         private EvaluationStatus evaluationStatus;
+        private String notes;
     }
 
     @Data
