@@ -13,6 +13,7 @@ import com.dat.backend_version_2.repository.training.StudentRepository;
 import com.dat.backend_version_2.service.authentication.UsersService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class StudentService {
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
 
-    public Student createStudent(StudentReq.StudentInfo studentInfo) throws IdInvalidException {
+    public Student createStudent(StudentReq.StudentInfo studentInfo) throws IdInvalidException, JsonProcessingException {
         Student student = new Student();
 
         // Academic Info
@@ -71,14 +72,14 @@ public class StudentService {
                 ));
     }
 
-    public List<StudentRes.PersonalAcademicInfo> getStudentsByIdBranch(Integer idBranch) throws IdInvalidException {
+    public List<StudentRes.PersonalAcademicInfo> getStudentsByIdBranch(Integer idBranch) throws IdInvalidException, JsonProcessingException {
         Branch branch = branchService.getBranchById(idBranch);
         return studentRepository.findByBranch(branch).stream()
                 .map(StudentMapper::studentToPersonalAcademicInfo)
                 .toList();
     }
 
-    public List<StudentRes.PersonalAcademicInfo> getStudentsByIdClassSession(String idClassSession) throws IdInvalidException {
+    public List<StudentRes.PersonalAcademicInfo> getStudentsByIdClassSession(String idClassSession) throws IdInvalidException, JsonProcessingException {
         ClassSession classSession = classSessionService.getClassSessionById(idClassSession);
 
         if (!classSession.getIsActive()) {

@@ -14,6 +14,7 @@ public interface FeatureRepository extends JpaRepository<Feature, UUID> {
     @Query("""
             SELECT DISTINCT f FROM Feature f
                         JOIN FETCH f.featureRoles fr
+                        JOIN FETCH fr.role r
             """)
     List<Feature> findAllWithRoles();
 }

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface StudentAttendanceRepository extends JpaRepository<StudentAttendance, UUID> {
+public interface StudentAttendanceRepository extends JpaRepository<StudentAttendance, AttendanceDTO.StudentAttendanceKey> {
     @Query("""
                 SELECT DISTINCT sa
                 FROM StudentAttendance sa

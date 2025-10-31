@@ -2,6 +2,7 @@ package com.dat.backend_version_2.service.tournament.Sparring;
 
 import com.dat.backend_version_2.domain.achievement.SparringList;
 import com.dat.backend_version_2.domain.tournament.BracketNode;
+import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeHistory;
 import com.dat.backend_version_2.domain.tournament.Sparring.SparringCombination;
 import com.dat.backend_version_2.domain.tournament.Sparring.SparringHistory;
 import com.dat.backend_version_2.dto.tournament.BracketNodeReq;
@@ -17,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,26 +103,49 @@ public class SparringHistoryService {
         sparringHistoryRepository.save(sparringHistory);
 
         // Lấy target node cha
-        Integer parentNode = bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(
-                participants,
-                sparringHistory.getTargetNode()
-        ).getParentNodeId();
-        if (sparringHistoryDTO.getNodeInfo().getTargetNode() != 0 && parentNode == null) {
+        Integer parentNode = Optional.ofNullable(
+                bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(participants, sparringHistory.getTargetNode())
+        ).map(BracketNode::getParentNodeId).orElse(null);
+
+        // Đánh dấu thua cho đối thủ cùng parentNode(nếu có)
+        List<SparringHistory> siblings = sparringHistoryRepository.findAllByTargetNodeAndIdSparringCombination(
+                sparringHistory.getTargetNode(),
+                sparringHistory.getSparringList().getSparringCombination().getIdSparringCombination()
+        );
+
+        for (SparringHistory sibling : siblings) {
+            if (!sibling.getIdSparringHistory().equals(sparringHistory.getIdSparringHistory())) {
+                sibling.setHasWon(false);
+                sparringHistoryRepository.save(sibling);
+
+                if (sparringHistory.getLevelNode() == 2) {
+                    SparringHistory loseSparringHistory = new SparringHistory();
+                    loseSparringHistory.setLevelNode(-1);
+                    loseSparringHistory.setSourceNode(sibling.getTargetNode());
+                    loseSparringHistory.setTargetNode(-1);
+                    loseSparringHistory.setSparringList(sibling.getSparringList());
+                    sparringHistoryRepository.save(loseSparringHistory);
+                }
+            }
+        }
+
+        if ((sparringHistoryDTO.getNodeInfo().getTargetNode() != 0 && sparringHistoryDTO.getNodeInfo().getTargetNode() != -1)
+                && parentNode == null) {
             throw new IdInvalidException("Parent node not found for targetNode " + sparringHistory.getTargetNode());
         }
 
         // Tạo node mới cho vòng tiếp theo
-        SparringHistory newSparringHistory = new SparringHistory();
-        newSparringHistory.setLevelNode(sparringHistory.getLevelNode() - 1);
-        newSparringHistory.setSourceNode(sparringHistory.getTargetNode());
-        newSparringHistory.setTargetNode(parentNode);
+        SparringHistory winSparringHistory = new SparringHistory();
+        winSparringHistory.setLevelNode(sparringHistory.getLevelNode() - 1);
+        winSparringHistory.setSourceNode(sparringHistory.getTargetNode());
+        winSparringHistory.setTargetNode(parentNode);
 
         // Sao chép thông tin liên kết
-        newSparringHistory.setSparringList(sparringHistory.getSparringList());
+        winSparringHistory.setSparringList(sparringHistory.getSparringList());
 
-        sparringHistoryRepository.save(newSparringHistory);
+        sparringHistoryRepository.save(winSparringHistory);
 
-        return newSparringHistory.getIdSparringHistory().toString();
+        return winSparringHistory.getIdSparringHistory().toString();
     }
 
     /**
@@ -190,5 +211,14 @@ public class SparringHistoryService {
 
         // 7️⃣ Xóa bản ghi gốc
         sparringHistoryRepository.delete(sparringHistory);
+    }
+
+    public List<SparringHistoryDTO> getAllSparringHistoryByIdTournament(
+            String idTournament) throws IdInvalidException {
+        return sparringHistoryRepository.findAllByIdTournament(
+                        UUID.fromString(idTournament))
+                .stream()
+                .map(SparringHistoryMapper::sparringHistoryToSparringHistoryDTO)
+                .toList();
     }
 }

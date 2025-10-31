@@ -1,15 +1,16 @@
 package com.dat.backend_version_2.domain.attendance;
 
+import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.domain.training.Student;
+import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.BaseAttendance;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,15 +18,32 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "StudentAttendance", schema = "attendance")
+@Table(name = "StudentAttendance", schema = "attendance",
+        indexes = {
+            @Index(name = "idx_class_session", columnList = "class_session")
+        }
+)
+@IdClass(AttendanceDTO.StudentAttendanceKey.class)
 public class StudentAttendance extends BaseAttendance {
     @Id
-    @GeneratedValue
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(updatable = false, nullable = false)
-    private UUID idAttendance;
+    @Column(name = "student_id_user")
+    private UUID idUser;
 
-    @ManyToOne
+    @Id
+    @Column(name = "class_session")
+    private String idClassSession;
+
+    @Id
+    @Column(name = "attendance_date")
+    private LocalDate attendanceDate;
+
+    @MapsId("idUser")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id_user")
     private Student student;
+
+    @MapsId("idClassSession")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_session")
+    private ClassSession classSession;
 }

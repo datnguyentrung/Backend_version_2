@@ -4,6 +4,7 @@ import com.dat.backend_version_2.domain.authz.Feature;
 import com.dat.backend_version_2.dto.authz.Feature.FeatureReq;
 import com.dat.backend_version_2.dto.authz.Feature.FeatureRes;
 import com.dat.backend_version_2.mapper.authz.FeatureMapper;
+import com.dat.backend_version_2.redis.authz.FeatureRedisImpl;
 import com.dat.backend_version_2.service.authz.FeatureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,8 @@ import java.util.List;
 public class FeatureController {
     private final FeatureService featureService;
 
+    private final FeatureRedisImpl featureRedis;
+
     @PostMapping
     public ResponseEntity<FeatureRes.BasicInfo> createFeature(
             @RequestBody FeatureReq featureInfo) {
@@ -29,7 +32,13 @@ public class FeatureController {
 
     @GetMapping
     public ResponseEntity<List<FeatureRes.BasicInfo>> getAllFeatures() {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(featureService.getAllFeatures());
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(featureService.getAllFeatures());
+        List<FeatureRes.BasicInfo> features = featureRedis.getAllFeatures();
+        if (features == null) {
+            features = featureService.getAllFeatures();
+            featureRedis.saveAllFeatures(features);
+        }
+        return ResponseEntity.ok(features);
     }
 }

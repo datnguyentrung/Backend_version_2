@@ -7,6 +7,7 @@ import com.dat.backend_version_2.dto.training.StudentClassSession.StudentClassSe
 import com.dat.backend_version_2.repository.training.StudentClassSessionRepository;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ public class StudentClassSessionService {
                     ClassSession classSession = null;
                     try {
                         classSession = classSessionService.getClassSessionById(idClassSession);
-                    } catch (IdInvalidException e) {
+                    } catch (IdInvalidException | JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
 

@@ -4,6 +4,7 @@ import com.dat.backend_version_2.dto.authentication.UserRes;
 import com.dat.backend_version_2.enums.training.Student.Member;
 import com.dat.backend_version_2.enums.training.BeltLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -66,7 +67,8 @@ public class StudentRes {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class PersonalAcademicInfo{
+    @Builder
+    public static class PersonalAcademicInfo {
         private PersonalInfo personalInfo;
         private AcademicInfo academicInfo;
     }

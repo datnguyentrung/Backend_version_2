@@ -1,46 +1,38 @@
 spring:
   datasource:
-    #    url: jdbc:postgresql://localhost:5432/version_2
-    #    username: root
-    #    password: 31102005
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/version_2}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:31102005}
 
-    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&preparedStatementCacheQueries=0
-    username: postgres.vrtckvdzbjlpjexfacqm
-    password: 31102005
     driver-class-name: org.postgresql.Driver
 
-
     hikari:
-      maximum-pool-size: 5           # ✅ Giới hạn tối đa 5 connection (đủ cho backend)
-      minimum-idle: 1                # Giảm idle connection
-      idle-timeout: 10000            # Đóng connection sau 10s không hoạt động
-      max-lifetime: 300000           # Đổi connection sau 5 phút (phòng leak)
-      connection-timeout: 10000      # Thời gian chờ nếu pool đầy
-      leak-detection-threshold: 20000  # Log cảnh báo nếu connection mở >20s
-      data-source-properties:
-        cachePrepStmts: false
-        prepStmtCacheSize: 0
-        useServerPrepStmts: false
-        prepareThreshold: 0
-        preparedStatementCacheQueries: 0
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 600000
+      connection-timeout: 20000
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+
+      ssl:
+        enabled: false
+
+      repositories:
+        enabled: true
 
   jpa:
     hibernate:
       ddl-auto: validate
     database: postgresql
     show-sql: true
-    open-in-view: false              # ✅ Tắt open-in-view để tránh giữ connection lâu
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        jdbc:
-          batch_size: 20
-        connection:
-          provider_disables_autocommit: true
-        temp:
-          use_jdbc_metadata_defaults: false
-        boot:
-          allow_jdbc_metadata_access: false
+    open-in-view: true
+    repositories:
+      enabled: true
 
   servlet:
     multipart:
@@ -52,13 +44,27 @@ spring:
 
 logging:
   level:
+    org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport: ERROR
     org.springframework.security: DEBUG
-    com.zaxxer.hikari: INFO          # ✅ Thêm log để xem trạng thái pool
+    com.zaxxer.hikari: INFO
 
 jwt:
-  base64-secret: TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
-  access-token-validity-in-seconds: 86400
-  refresh-token-validity-in-seconds: 8640000
+  base64-secret: ${JWT_BASE64_SECRET}
+  access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS}
+  refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS}
 
 password:
-  time_password_change_days: 30
+  time_password_change_days: ${TIME_PASSWORD_CHANGE_DAYS}
+
+cache:
+  ttl:
+    one-day-seconds: 86400
+    one-week-seconds: 604800
+    one-month-seconds: 2592000
+
+bytescale:
+  account-id: ${BYTESCALE_ACCOUNT_ID}
+  api-key: ${BYTESCALE_API_KEY}
+
+server:
+  port: ${PORT:8080}

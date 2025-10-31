@@ -17,15 +17,6 @@ import java.util.List;
 public class SparringHistoryController {
     private final SparringHistoryService sparringHistoryService;
 
-//    @PostMapping("/participants/{participants}")
-//    public ResponseEntity<String> createSparringHistory(@PathVariable Integer participants) {
-//        if (participants == 0) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid participants");
-//        }
-//        sparringHistoryService.createSparringHistory(participants);
-//        return ResponseEntity.status(HttpStatus.CREATED).body("Sparring history created");
-//    }
-
     @PostMapping
     public ResponseEntity<String> createSparringHistory(@RequestBody List<String> sparringList
     ) throws IdInvalidException {
@@ -71,5 +62,11 @@ public class SparringHistoryController {
 
         // ✅ Trả về phản hồi thành công (204 No Content hoặc 200 OK)
         return ResponseEntity.ok("Đã xóa SparringHistory thành công (id = " + idSparringHistory + ")");
+    }
+
+    @GetMapping("/tournament/{idTournament}")
+    public ResponseEntity<List<SparringHistoryDTO>> getByIdTournament(
+            @PathVariable String idTournament) throws IdInvalidException {
+        return ResponseEntity.ok(sparringHistoryService.getAllSparringHistoryByIdTournament(idTournament));
     }
 }

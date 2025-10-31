@@ -20,31 +20,79 @@ import java.util.List;
 public class PoomsaeHistoryController {
     private final PoomsaeHistoryService poomsaeHistoryService;
 
-//    @PostMapping("/participants/{participants}")
-//    public ResponseEntity<String> createPoomsaeHistory(@PathVariable Integer participants) {
-//        if (participants == 0) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid participants");
-//        }
-//        poomsaeHistoryService.createPoomsaeHistory(participants);
-//        return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
-//    }
-
-    @PostMapping
-    public ResponseEntity<String> createPoomsaeHistory(@RequestBody List<String> poomsaeList
+    @PostMapping("/elimination")
+    public ResponseEntity<String> createPoomsaeHistoryForNode(@RequestBody List<String> poomsaeList
     ) throws IdInvalidException {
         if (poomsaeList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Poomsae list is empty");
         }
         System.out.println(poomsaeList);
-        poomsaeHistoryService.createPoomsaeHistory(poomsaeList);
+        poomsaeHistoryService.createPoomsaeHistoryForNode(poomsaeList);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
+    }
+
+    @PostMapping("/round-robin")
+    public ResponseEntity<String> createPoomsaeHistoryForRoundRobin(@RequestBody List<String> poomsaeList
+    ) throws IdInvalidException {
+        if (poomsaeList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Poomsae list is empty");
+        }
+        System.out.println(poomsaeList);
+        poomsaeHistoryService.createPoomsaeHistoryForRoundRobin(poomsaeList);
         return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
     }
 
     @GetMapping
-    public ResponseEntity<List<PoomsaeHistoryDTO>> getPoomsaeHistory() {
+    public ResponseEntity<List<PoomsaeHistoryDTO>> getAllPoomsaeHistory() {
         return ResponseEntity.ok(poomsaeHistoryService.getAllPoomsaeHistory().stream()
                 .map(PoomsaeHistoryMapper::poomsaeHistoryToPoomsaeHistoryDTO)
                 .toList());
+    }
+
+    @PostMapping("/elimination/winner")
+    public ResponseEntity<String> createPoomsaeWinner(
+            @RequestParam int participants,
+            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
+    ) throws IdInvalidException {
+        String newNodeId = poomsaeHistoryService.createWinnerForElimination(poomsaeHistoryDTO, participants);
+        return ResponseEntity.ok("Winner created successfully with new node ID: " + newNodeId);
+    }
+
+    @PostMapping("/round-robin/winner")
+    public ResponseEntity<String> createRoundRobinWinner(
+            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
+    ) throws IdInvalidException {
+        poomsaeHistoryService.createWinnerForRoundRobin(poomsaeHistoryDTO);
+
+        String message = String.format(
+                "✅ Winner processed successfully for combination: %s",
+                poomsaeHistoryDTO.getReferenceInfo().getName()
+        );
+
+        return ResponseEntity.ok(message);
+    }
+
+    @DeleteMapping("/elimination")
+    public ResponseEntity<String> deletePoomsaeHistoryForElimination(
+            @RequestParam int participants,
+            @RequestParam String idPoomsaeHistory) throws IdInvalidException {
+
+        // 🧩 Gọi service để xử lý logic xóa
+        poomsaeHistoryService.deletePoomsaeHistoryForElimination(participants, idPoomsaeHistory);
+
+        // ✅ Trả về phản hồi thành công (204 No Content hoặc 200 OK)
+        return ResponseEntity.ok("Đã xóa PoomsaeHistory thành công (id = " + idPoomsaeHistory + ")");
+    }
+
+    @DeleteMapping("/round-robin")
+    public ResponseEntity<String> deletePoomsaeHistoryForRoundRobin(
+            @RequestParam String idPoomsaeHistory) throws IdInvalidException {
+
+        // 🧩 Gọi service để xử lý logic xóa
+        poomsaeHistoryService.deletePoomsaeHistoryForRoundRobin(idPoomsaeHistory);
+
+        // ✅ Trả về phản hồi thành công (204 No Content hoặc 200 OK)
+        return ResponseEntity.ok("Đã xóa PoomsaeHistory thành công (id = " + idPoomsaeHistory + ")");
     }
 
     @GetMapping("/combination/{idPoomsaeConbination}")
@@ -53,26 +101,15 @@ public class PoomsaeHistoryController {
         return ResponseEntity.ok(poomsaeHistoryService.getAllPoomsaeHistoryByIdPoomsaeCombination(idPoomsaeConbination));
     }
 
-    @PostMapping("/winner")
-    public ResponseEntity<String> createPoomsaeWinner(
-            @RequestParam int participants,
-            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
-    ) throws IdInvalidException {
-        System.out.println("poomsaeHistoryDTO: " + poomsaeHistoryDTO);
-        System.out.println("participants: " + participants);
-        String newNodeId = poomsaeHistoryService.createWinner(poomsaeHistoryDTO, participants);
-        return ResponseEntity.ok("Winner created successfully with new node ID: " + newNodeId);
+    @DeleteMapping("/combination/{idPoomsaeCombination}")
+    public ResponseEntity<String> deleteAllPoomsaeHistoryByIdPoomsaeCombination(
+            @PathVariable String idPoomsaeCombination) throws IdInvalidException {
+        poomsaeHistoryService.deleteAllPoomsaeHistoryByIdPoomsaeCombination(idPoomsaeCombination);
+        return ResponseEntity.ok("All Poomsae histories deleted for combination id: " + idPoomsaeCombination);
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deletePoomsaeHistory(
-            @RequestParam int participants,
-            @RequestParam String idPoomsaeHistory) throws IdInvalidException {
-
-        // 🧩 Gọi service để xử lý logic xóa
-        poomsaeHistoryService.deletePoomsaeHistory(participants, idPoomsaeHistory);
-
-        // ✅ Trả về phản hồi thành công (204 No Content hoặc 200 OK)
-        return ResponseEntity.ok("Đã xóa PoomsaeHistory thành công (id = " + idPoomsaeHistory + ")");
+    @GetMapping("/tournament/{idTournament}")
+    public ResponseEntity<List<PoomsaeHistoryDTO>> getByIdTournament(@PathVariable String idTournament) throws IdInvalidException {
+        return ResponseEntity.ok(poomsaeHistoryService.getAllPoomsaeHistoryByIdTournament(idTournament));
     }
 }

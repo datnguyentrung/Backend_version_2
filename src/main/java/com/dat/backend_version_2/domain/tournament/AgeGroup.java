@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.domain.tournament;
 
 import com.dat.backend_version_2.enums.tournament.AgeDivision;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "AgeGroup", schema = "tournament")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AgeGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +24,7 @@ public class AgeGroup {
     private String ageGroupName;
     private Boolean isActive = true;
 
-    @ElementCollection(targetClass = AgeDivision.class)
+    @ElementCollection(targetClass = AgeDivision.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "age_group_age_divisions",
             joinColumns = @JoinColumn(name = "id_age_group"),

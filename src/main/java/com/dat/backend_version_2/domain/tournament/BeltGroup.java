@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.domain.tournament;
 
 import com.dat.backend_version_2.enums.training.BeltLevel;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "BeltGroup", schema = "tournament")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class BeltGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +24,7 @@ public class BeltGroup {
     private String beltGroupName;
     private Boolean isActive = true;
 
-    @ElementCollection(targetClass = BeltLevel.class)
+    @ElementCollection(targetClass = BeltLevel.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "belt_group_belt_levels",
             joinColumns = @JoinColumn(name = "id_belt_group"),

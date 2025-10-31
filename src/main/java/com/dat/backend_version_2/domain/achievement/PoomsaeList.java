@@ -27,27 +27,27 @@ public class PoomsaeList {
     @Column(updatable = false, nullable = false)
     private UUID idPoomsaeList;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id_user")
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament")
     private Tournament tournament;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch")
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "poomsae_combination")
+    private PoomsaeCombination poomsaeCombination;
 
     @Enumerated(EnumType.STRING)
     private Medal medal;
 
     @Enumerated(EnumType.STRING)
     private AgeDivision ageDivision;
-
-    @ManyToOne
-    @JoinColumn(name = "branch")
-    private Branch branch;
-
-    @ManyToOne
-    @JoinColumn(name = "poomsae_combination")
-    private PoomsaeCombination poomsaeCombination;
 
     @PrePersist
     @PreUpdate
