@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${SPRING_DATABASE_URL:jdbc:postgresql://localhost:5432/version_2}
-    username: ${SPRING_DATABASE_USERNAME:root}
-    password: ${SPRING_DATABASE_PASSWORD:31102005}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/version_2}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:31102005}
 
     driver-class-name: org.postgresql.Driver
 
