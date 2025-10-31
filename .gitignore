@@ -1,34 +1,57 @@
-HELP.md
+# .gitignore
+
+# 1. Build Output & Dependencies
+#================================
 target/
+build/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
+# 2. IDE Configuration
+#================================
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
 
+### STS / Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 
 ### VS Code ###
 .vscode/
+
+# 3. Environment & Sensitive Files
+#================================
+# Chứa API keys, passwords, database URLs
 .env
+*.env
+application-local.properties
+application-local.yml
+
+# 4. OS & Log Files
+#================================
+# Log files
+*.log
+logs/
+
+# Tệp rác của Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# 5. Optional Files
+#================================
+# Bỏ dòng này nếu bạn muốn giữ lại file HELP.md
+HELP.md
