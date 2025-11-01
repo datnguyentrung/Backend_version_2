@@ -3,7 +3,6 @@ package com.dat.backend_version_2.redis.training;
 import com.dat.backend_version_2.config.CacheTtlConfig;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +31,12 @@ public class StudentRedisImpl implements StudentRedis {
         log.debug("Attempting to get all students from cache with key: {}", key);
 
         String json = (String) redisTemplate.opsForValue().get(key);
-        if (json != null) {
-            log.debug("Cache HIT for all students");
-            return redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {});
-        } else {
-            log.debug("Cache MISS for all students");
-            return null;
+        try{
+            return json != null ?
+                    redisObjectMapper.readValue(json, redisObjectMapper.getTypeFactory().constructCollectionType(List.class, StudentRes.PersonalAcademicInfo.class))
+                    : null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -53,12 +52,12 @@ public class StudentRedisImpl implements StudentRedis {
         log.debug("Key exists in Redis: {}", keyExists);
 
         String json = (String) redisTemplate.opsForValue().get(key);
-        if (json != null) {
-            log.info("Cache HIT for class session: {}", idClassSession);
-            return redisObjectMapper.readValue(json, new TypeReference<List<StudentRes.PersonalAcademicInfo>>() {});
-        } else {
-            log.info("Cache MISS for class session: {}", idClassSession);
-            return null;
+        try {
+            return json != null ?
+                    redisObjectMapper.readValue(json, redisObjectMapper.getTypeFactory().constructCollectionType(List.class, StudentRes.PersonalAcademicInfo.class))
+                    : null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
