@@ -75,4 +75,4 @@ bytescale:
   api-key: ${BYTESCALE_API_KEY}
 
 server:
-  port: ${PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
