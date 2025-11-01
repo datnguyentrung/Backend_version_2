@@ -33,8 +33,8 @@ spring:
     hibernate:
       ddl-auto: none
     database: postgresql
-    show-sql: false
-    open-in-view: false
+    show-sql: true
+    open-in-view: true
     repositories:
       enabled: true
     defer-datasource-initialization: true
