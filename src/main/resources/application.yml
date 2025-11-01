@@ -7,11 +7,12 @@ spring:
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      maximum-pool-size: 15
-      minimum-idle: 5
-      idle-timeout: 30000
-      max-lifetime: 600000
-      connection-timeout: 20000
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      leak-detection-threshold: 60000
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}
@@ -29,10 +30,15 @@ spring:
     hibernate:
       ddl-auto: validate
     database: postgresql
-    show-sql: true
-    open-in-view: true
+    show-sql: false
+    open-in-view: false
     repositories:
       enabled: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
 
   servlet:
     multipart:
@@ -45,8 +51,10 @@ spring:
 logging:
   level:
     org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport: ERROR
-    org.springframework.security: DEBUG
-    com.zaxxer.hikari: INFO
+    org.springframework.security: WARN
+    com.zaxxer.hikari: WARN
+    org.hibernate: WARN
+    root: INFO
 
 jwt:
   base64-secret: ${JWT_BASE64_SECRET}
@@ -67,4 +75,4 @@ bytescale:
   api-key: ${BYTESCALE_API_KEY}
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:8080}
