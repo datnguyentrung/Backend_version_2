@@ -91,8 +91,11 @@ server:
   address: 0.0.0.0
 
 management:
-  server:
-    port: ${PORT:8080}
   endpoints:
     web:
       base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
