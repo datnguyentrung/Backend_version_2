@@ -4,23 +4,26 @@ import com.dat.backend_version_2.config.CacheTtlConfig;
 import com.dat.backend_version_2.domain.training.Coach;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class CoachRedisImpl implements CoachRedis {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final CacheTtlConfig cacheTtlConfig;
     private final ObjectMapper redisObjectMapper;
+    private final RedisConnectionFactory redisConnectionFactory;
 
     @Override
     public void clear() {
-        var connectionFactory = redisTemplate.getConnectionFactory();
-        if (connectionFactory != null) {
-            try (var connection = connectionFactory.getConnection()) {
+        if (redisConnectionFactory != null) {
+            try (var connection = redisConnectionFactory.getConnection()) {
                 connection.serverCommands().flushDb(); // chỉ xóa DB hiện tại
             }
         }
@@ -29,7 +32,7 @@ public class CoachRedisImpl implements CoachRedis {
     @Override
     public Coach getCoachByIdAccount(String idAccount) {
         String key = "coach:" + idAccount;
-        String json = (String) redisTemplate.opsForValue().get(key);
+        String json = stringRedisTemplate.opsForValue().get(key);
 
         try {
             return json != null ?
@@ -45,7 +48,15 @@ public class CoachRedisImpl implements CoachRedis {
     public void saveCoachByIdAccount(String idAccount, Coach coach) {
         String key = "coach:" + idAccount;
 
-        var ttl = cacheTtlConfig.getOneMonthSeconds();
-        redisTemplate.opsForValue().set(key, coach, ttl);
+        try{
+            String json = redisObjectMapper.writeValueAsString(coach);
+            stringRedisTemplate.opsForValue().set(
+                    key,
+                    json,
+                    Duration.ofMinutes(cacheTtlConfig.getOneMonthSeconds())
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

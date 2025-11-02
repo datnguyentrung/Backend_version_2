@@ -6,24 +6,27 @@ import com.dat.backend_version_2.dto.training.ClassSession.ClassSessionRes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class ClassSessionRedisImpl implements ClassSessionRedis {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final CacheTtlConfig cacheTtlConfig;
     private final ObjectMapper redisObjectMapper;
+    private final RedisConnectionFactory connectionFactory;
 
     @Override
     public List<ClassSessionRes> getAllClassSessions() throws JsonProcessingException {
         String key = "classSessions:all";
-        String json = (String) redisTemplate.opsForValue().get(key);
-        var ttl = cacheTtlConfig.getOneMonthSeconds();
+        String json = stringRedisTemplate.opsForValue().get(key);
 
         try {
             return json != null ?
@@ -36,7 +39,6 @@ public class ClassSessionRedisImpl implements ClassSessionRedis {
 
     @Override
     public void clear() {
-        var connectionFactory = redisTemplate.getConnectionFactory();
         if (connectionFactory != null) {
             try (var connection = connectionFactory.getConnection()) {
                 connection.serverCommands().flushDb(); // chỉ xóa DB hiện tại
@@ -50,7 +52,7 @@ public class ClassSessionRedisImpl implements ClassSessionRedis {
         String key = "classSessions:all";
         try {
             String json = redisObjectMapper.writeValueAsString(classSessions);
-            redisTemplate.opsForValue().set(key, json);
+            stringRedisTemplate.opsForValue().set(key, json);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -59,7 +61,7 @@ public class ClassSessionRedisImpl implements ClassSessionRedis {
     @Override
     public ClassSession getClassSessionById(String idClassSession) throws JsonProcessingException {
         String key = "classSession:" + idClassSession;
-        String json = (String) redisTemplate.opsForValue().get(key);
+        String json = stringRedisTemplate.opsForValue().get(key);
 
         try {
             return json != null ?
@@ -76,7 +78,7 @@ public class ClassSessionRedisImpl implements ClassSessionRedis {
         var ttl = cacheTtlConfig.getOneMonthSeconds();
         try {
             String json = redisObjectMapper.writeValueAsString(classSession);
-            redisTemplate.opsForValue().set(key, json, ttl);
+            stringRedisTemplate.opsForValue().set(key, json, Duration.ofSeconds(ttl));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
