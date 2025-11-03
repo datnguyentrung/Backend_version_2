@@ -6,6 +6,7 @@ import com.dat.backend_version_2.domain.training.Student;
 import com.dat.backend_version_2.domain.training.StudentClassSession;
 import com.dat.backend_version_2.dto.training.Student.StudentReq;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
+import com.dat.backend_version_2.dto.training.StudentClassSession.StudentClassSessionReq;
 import com.dat.backend_version_2.enums.training.BeltLevel;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
 import com.dat.backend_version_2.repository.training.BranchRepository;
@@ -29,6 +30,7 @@ public class StudentService {
     private final BranchService branchService;
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
+    private final StudentClassSessionService studentClassSessionService;
 
     public Student createStudent(StudentReq.StudentInfo studentInfo) throws IdInvalidException, JsonProcessingException {
         Student student = new Student();
@@ -55,8 +57,16 @@ public class StudentService {
         // Gọi hàm setup chung cho Users
         usersService.setupBaseUser(student, "STUDENT");
 
-        // Lưu student
-        return studentRepository.save(student);
+        // Lưu student TRƯỚC để generate ID
+        student = studentRepository.save(student);
+
+        // SAU ĐÓ mới tạo relationships với ClassSession
+        studentClassSessionService.createStudentClassSession(
+                student,
+                studentInfo.getAcademic().getClassSession()
+        );
+
+        return student;
     }
 
     public List<StudentRes.PersonalAcademicInfo> getAllStudents() {

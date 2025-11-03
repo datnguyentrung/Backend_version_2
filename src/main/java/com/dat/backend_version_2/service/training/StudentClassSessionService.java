@@ -8,6 +8,7 @@ import com.dat.backend_version_2.repository.training.StudentClassSessionReposito
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StudentClassSessionService {
     private final StudentClassSessionRepository studentClassSessionRepository;
-    private final StudentService studentService;
     private final ClassSessionService classSessionService;
 
     public List<Student> getStudentsByClassSession(String idClassSession) {
@@ -35,12 +35,24 @@ public class StudentClassSessionService {
         return studentIds;
     }
 
-    @Transactional
-    public void createStudentClassSession(StudentClassSessionReq request) {
-        Student student = studentService.getStudentById(request.getIdUser());
+    public List<UUID> getStudentIdsByClassSession(String idClassSession) {
+        List<UUID> studentIds = studentClassSessionRepository
+                .findStudentIdsByClassSession(idClassSession);
 
-        List<StudentClassSession> studentClassSessions = request.getIdClassSessions().stream()
+        if (studentIds == null || studentIds.isEmpty()) {
+            throw new UserNotFoundException(
+                    "Không tìm thấy học viên nào cho classSession: " + idClassSession
+            );
+        }
+
+        return studentIds;
+    }
+
+    @Transactional
+    public void createStudentClassSession(Student student, List<String> idClassSessions) {
+        List<StudentClassSession> studentClassSessions = idClassSessions.stream()
                 .map(idClassSession -> {
+                    // Verify that the ClassSession exists and is active
                     ClassSession classSession = null;
                     try {
                         classSession = classSessionService.getClassSessionById(idClassSession);
@@ -53,8 +65,10 @@ public class StudentClassSessionService {
                     }
 
                     StudentClassSession studentClassSession = new StudentClassSession();
-                    studentClassSession.setStudent(student);
-                    studentClassSession.setClassSession(classSession);
+                    // Now we can simply set the IDs since we removed @MapsId
+                    studentClassSession.setIdUser(student.getIdUser());
+                    studentClassSession.setIdClassSession(idClassSession);
+
                     return studentClassSession;
                 })
                 .toList();

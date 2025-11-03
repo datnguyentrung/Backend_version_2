@@ -1,14 +1,14 @@
 package com.dat.backend_version_2.dto.attendance;
 
-import com.dat.backend_version_2.domain.training.ClassSession;
+import com.dat.backend_version_2.dto.training.ClassSession.ClassSessionRes;
 import lombok.Data;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 public class CoachAttendanceRes {
     private String name;
 
-    private Instant createdAt;
-    private ClassSession classSession;
+    private LocalDateTime createdAt;
+    private ClassSessionRes classSession;
 }

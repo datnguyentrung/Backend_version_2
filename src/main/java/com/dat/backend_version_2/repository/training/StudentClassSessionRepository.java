@@ -19,4 +19,11 @@ public interface StudentClassSessionRepository extends JpaRepository<StudentClas
     List<Student> findStudentsByClassSession(@Param("idClassSession") String idClassSession);
 
     Boolean existsByIdClassSessionAndIdUser(String idClassSession, UUID idUser);
+
+    @Query("""
+                SELECT scs.idUser
+                FROM StudentClassSession scs
+                WHERE scs.idClassSession = :idClassSession
+            """)
+    List<UUID> findStudentIdsByClassSession(String idClassSession);
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -18,12 +19,28 @@ public interface StudentAttendanceRepository extends JpaRepository<StudentAttend
     @Query("""
                 SELECT DISTINCT sa
                 FROM StudentAttendance sa
-                JOIN FETCH sa.student
+                JOIN FETCH sa.student st
+                JOIN FETCH st.branch b
+                LEFT JOIN FETCH st.studentClassSessions scs
+                LEFT JOIN FETCH sa.attendanceCoach ac
+                LEFT JOIN FETCH sa.evaluationCoach ec
                 JOIN FETCH sa.classSession cs
                 WHERE cs.idClassSession = :idClassSession
                   AND sa.attendanceDate = :attendanceDate
             """)
     List<StudentAttendance> findByIdClassSessionAndAttendanceDate(
+            @Param("idClassSession") String idClassSession,
+            @Param("attendanceDate") LocalDate attendanceDate
+    );
+
+    @Query("""
+                SELECT DISTINCT sa.idUser
+                FROM StudentAttendance sa
+                JOIN sa.classSession cs
+                WHERE cs.idClassSession = :idClassSession
+                  AND sa.attendanceDate = :attendanceDate
+            """)
+    Set<UUID> findAttendedStudentIdsByClassSessionAndDate(
             @Param("idClassSession") String idClassSession,
             @Param("attendanceDate") LocalDate attendanceDate
     );

@@ -5,12 +5,14 @@ import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
 import com.dat.backend_version_2.service.attendance.StudentAttendanceService;
 import com.dat.backend_version_2.service.training.ClassSessionService;
+import com.dat.backend_version_2.util.SecurityUtil;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/student-attendance")
@@ -44,6 +47,19 @@ public class StudentAttendanceController {
             @RequestBody StudentAttendanceDTO.StudentMarkAttendance markAttendance,
             Authentication authentication) throws IdInvalidException, ResponseStatusException {
         String idAccount = authentication.getName();
+
+        // Lấy status từ JWT token
+        Optional<String> userStatus = SecurityUtil.getCurrentUserStatus();
+        if (userStatus.isPresent()) {
+            String status = userStatus.get();
+            System.out.println("User status: " + status);
+
+            // Kiểm tra status nếu cần
+            if (!"ACTIVE".equals(status)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("User account is not active. Status: " + status);
+            }
+        }
 
         studentAttendanceService.markAttendance(markAttendance, idAccount);
         return ResponseEntity.ok(
@@ -99,14 +115,7 @@ public class StudentAttendanceController {
     @GetMapping("/class-session")
     public ResponseEntity<List<StudentAttendanceDTO.StudentAttendanceDetail>> getAttendanceByClassSession(
             @RequestParam String idClassSession,
-            @RequestParam LocalDate attendanceDate) throws IdInvalidException, JsonProcessingException {
-
-        ClassSession classSession = classSessionService
-                .getClassSessionById(idClassSession);
-
-        if (!classSession.getIsActive()) {
-            throw new RuntimeException("ClassSession is not active");
-        }
+            @RequestParam LocalDate attendanceDate) throws IdInvalidException {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 studentAttendanceService.getAttendanceByClassSessionAndDate(idClassSession, attendanceDate));

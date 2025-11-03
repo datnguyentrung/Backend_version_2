@@ -13,8 +13,8 @@ public class StudentAttendanceMapper {
             return null;
         }
         AttendanceDTO.StudentAttendanceKey attendanceKey = new AttendanceDTO.StudentAttendanceKey();
-        attendanceKey.setIdUser(studentAttendance.getStudent().getIdUser());
-        attendanceKey.setIdClassSession(studentAttendance.getClassSession().getIdClassSession());
+        attendanceKey.setIdUser(studentAttendance.getIdUser());
+        attendanceKey.setIdClassSession(studentAttendance.getIdClassSession());
         attendanceKey.setAttendanceDate(studentAttendance.getAttendanceDate());
         return attendanceKey;
     }

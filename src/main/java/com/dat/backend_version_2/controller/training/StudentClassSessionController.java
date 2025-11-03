@@ -1,7 +1,9 @@
 package com.dat.backend_version_2.controller.training;
 
+import com.dat.backend_version_2.domain.training.Student;
 import com.dat.backend_version_2.dto.training.StudentClassSession.StudentClassSessionReq;
 import com.dat.backend_version_2.service.training.StudentClassSessionService;
+import com.dat.backend_version_2.service.training.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +20,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StudentClassSessionController {
     private final StudentClassSessionService studentClassSessionService;
+    private final StudentService studentService;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createStudentClassSession(@RequestBody StudentClassSessionReq request) {
         Map<String, Object> response = new HashMap<>();
+        Student student = studentService.getStudentById(request.getIdUser());
 
         try {
-            studentClassSessionService.createStudentClassSession(request);
+            studentClassSessionService.createStudentClassSession(student, request.getIdClassSessions());
 
             // Trả về response
             response.put("status", "success");

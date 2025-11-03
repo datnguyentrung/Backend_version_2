@@ -32,6 +32,6 @@ public class Coach extends Users {
     @Enumerated(EnumType.STRING)
     private BeltLevel beltLevel;
 
-    @OneToMany(mappedBy = "coach", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "coach", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
     private List<CoachClassSession> coachClassSessions = new ArrayList<>();
 }

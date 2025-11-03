@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -63,34 +64,30 @@ public class StudentAttendanceService {
             );
         }
 
-        ClassSession classSession = classSessionService
-                .getClassSessionById(idClassSession);
+        classSessionService.validateActiveClassSession(idClassSession);
 
-        if (!classSession.getIsActive()) {
-            throw new RuntimeException("ClassSession is not active");
+        List<UUID> allStudentIdsInClassSession = studentClassSessionService
+                .getStudentIdsByClassSession(idClassSession);
+
+        if (allStudentIdsInClassSession.isEmpty()) {
+            // Tùy chọn: Xử lý trường hợp không có học viên trong lớp
+            return;
         }
 
-        List<Student> students = studentClassSessionService
-                .getStudentsByClassSession(idClassSession);
+        Set<UUID> attendedStudentIds = studentAttendanceRepository
+                .findAttendedStudentIdsByClassSessionAndDate(idClassSession, attendanceDate);
 
-        List<StudentAttendanceDTO.StudentAttendanceDetail> studentAttendances = getAttendanceByClassSessionAndDate(idClassSession, attendanceDate);
+        List<UUID> unrecordedStudentIds = allStudentIdsInClassSession.stream()
+                .filter(studentId -> !attendedStudentIds.contains(studentId))
+                .toList();
 
-        Set<String> attendanceSet = new HashSet<>(
-                studentAttendances.stream()
-                        .map(a -> a.getPersonalAcademicInfo()
-                                .getPersonalInfo()
-                                .getIdAccount())
-                        .toList()
-        );
-
-        List<StudentAttendance> attendances = students.stream()
-                .filter(student -> !attendanceSet.contains(student.getIdAccount()))
-                .map(student -> {
+        List<StudentAttendance> attendances = unrecordedStudentIds.stream()
+                .map(studentId -> {
                     StudentAttendance attendance = new StudentAttendance();
                     attendance.setAttendanceDate(attendanceDate);
 
-                    attendance.setStudent(student);
-                    attendance.setClassSession(classSession);
+                    attendance.setIdUser(studentId);
+                    attendance.setIdClassSession(idClassSession);
 
                     attendance.setAttendanceCoach(coach);
                     return attendance;
@@ -116,13 +113,13 @@ public class StudentAttendanceService {
     ) throws IdInvalidException, ResponseStatusException {
         StudentAttendance studentAttendance = getStudentAttendanceById(markAttendance.getAttendanceKey());
 
-        Coach coach = coachService.getCoachById(idAccount);
-        if (!coach.getIsActive()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Coach no longer have permission to use this feature"
-            );
-        }
+//        Coach coach = coachService.getCoachById(idAccount);
+//        if (!coach.getIsActive()) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.FORBIDDEN,
+//                    "Coach no longer have permission to use this feature"
+//            );
+//        }
 
         studentAttendance.setAttendanceStatus(markAttendance.getAttendanceStatus());
         if (markAttendance.getAttendanceStatus() == AttendanceStatus.V ||

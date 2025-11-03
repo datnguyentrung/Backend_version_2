@@ -52,5 +52,6 @@ public abstract class Users {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role", referencedColumnName = "idRole")
+    @JsonIgnore
     private Roles role;
 }

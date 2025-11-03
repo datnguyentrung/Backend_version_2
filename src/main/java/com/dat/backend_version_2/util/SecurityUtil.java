@@ -128,4 +128,20 @@ public class SecurityUtil {
                 .map(GrantedAuthority::getAuthority)
                 .findFirst();
     }
+
+    public static Optional<String> getCurrentUserStatus() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            // Lấy user object từ claims
+            Object userClaim = jwt.getClaim("user");
+            if (userClaim instanceof java.util.Map<?, ?> userMap) {
+                Object status = userMap.get("status");
+                return status != null ? Optional.of(status.toString()) : Optional.empty();
+            }
+        }
+
+        return Optional.empty();
+    }
 }

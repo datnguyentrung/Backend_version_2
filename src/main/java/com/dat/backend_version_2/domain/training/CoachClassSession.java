@@ -26,14 +26,12 @@ public class CoachClassSession {
     private String idClassSession;
 
     @ManyToOne
-    @MapsId("idUser")
-    @JoinColumn(name = "idUser", referencedColumnName = "idUser")
+    @JoinColumn(name = "idUser", referencedColumnName = "idUser", insertable = false, updatable = false)
     @JsonIgnore
     private Coach coach;
 
     @ManyToOne
-    @MapsId("idClassSession")
-    @JoinColumn(name = "classSession", referencedColumnName = "idClassSession")
+    @JoinColumn(name = "classSession", referencedColumnName = "idClassSession", insertable = false, updatable = false)
     @JsonIgnore
     private ClassSession classSession;
 }

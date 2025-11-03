@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -35,20 +36,18 @@ public class CoachAttendance {
     private LocalDate attendanceDate;
 
     @Column(name = "created_at")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
-        if (createdAt == null) createdAt = Instant.now();
-        this.attendanceDate = ConverterUtils.instantToLocalDate(createdAt);
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        this.attendanceDate = ConverterUtils.localDateTimeToLocalDate(createdAt);
     }
 
-    @MapsId("idUser")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coach_id_user")
+    @JoinColumn(name = "coach_id_user", insertable = false, updatable = false)
     private Coach coach;
 
-    @MapsId("idClassSession")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_session", insertable = false, updatable = false)
     private ClassSession classSession;

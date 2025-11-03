@@ -12,4 +12,6 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Stri
                         JOIN FETCH cs.branch b
             """)
     List<ClassSession> findAllWithBranch();
+
+    boolean existsByIdClassSessionAndIsActiveTrue(String idClassSession);
 }

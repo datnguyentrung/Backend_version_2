@@ -18,10 +18,10 @@ spring:
       auto-commit: false
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST}
-      port: ${SPRING_DATA_REDIS_PORT}
-      username: ${SPRING_DATA_REDIS_USERNAME}
-      password: ${SPRING_DATA_REDIS_PASSWORD}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      username: ${SPRING_DATA_REDIS_USERNAME:}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
 
       ssl:
         enabled: false
@@ -31,10 +31,10 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none # none, validate, update, create, create-drop, update
+      ddl-auto: update # none, validate, update, create, create-drop, update
     database: postgresql
-    show-sql: false
-    open-in-view: false
+    show-sql: true
+    open-in-view: true
     repositories:
       enabled: true
     defer-datasource-initialization: true
@@ -69,6 +69,8 @@ logging:
     org.hibernate: WARN
     org.postgresql: WARN
     root: INFO
+
+    org.springframework.web: DEBUG
 
 jwt:
   base64-secret: ${JWT_BASE64_SECRET}

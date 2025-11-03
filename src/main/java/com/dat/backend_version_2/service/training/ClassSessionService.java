@@ -18,6 +18,18 @@ public class ClassSessionService {
     private final ClassSessionRepository classSessionRepository;
     private final ClassSessionRedisImpl classSessionRedis;
 
+    public void validateClassSessionExists(String idClassSession) throws IdInvalidException {
+        if (!classSessionRepository.existsById(idClassSession)) {
+            throw new IdInvalidException("ClassSession not found by id: " + idClassSession);
+        }
+    }
+
+    public void validateActiveClassSession(String idClassSession) throws IdInvalidException {
+        if (!classSessionRepository.existsByIdClassSessionAndIsActiveTrue(idClassSession)) {
+            throw new IdInvalidException("Active ClassSession not found by id: " + idClassSession);
+        }
+    }
+
     public ClassSession getClassSessionById(String sessionId) throws IdInvalidException, JsonProcessingException {
         ClassSession classSession = classSessionRedis.getClassSessionById(sessionId);
         if (classSession == null) {

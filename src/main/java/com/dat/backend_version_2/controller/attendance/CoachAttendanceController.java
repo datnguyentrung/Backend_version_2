@@ -41,7 +41,7 @@ public class CoachAttendanceController {
             @RequestBody CoachAttendanceDTO.CreateRequest createRequest) throws IdInvalidException, JsonProcessingException {
         coachAttendanceService.markCoachAttendance(createRequest);
 
-        LocalDate date = ConverterUtils.instantToLocalDate(createRequest.getCreatedAt());
+        LocalDate date = ConverterUtils.localDateTimeToLocalDate(createRequest.getCreatedAt());
 
         String key = coachAttendanceRedis.getKeyByIdCoachAndYearAndMonth(
                 createRequest.getIdAccount(),

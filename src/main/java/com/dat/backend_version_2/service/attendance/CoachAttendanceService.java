@@ -37,12 +37,14 @@ public class CoachAttendanceService {
     @Transactional
     public void markCoachAttendance(CoachAttendanceDTO.CreateRequest request) throws IdInvalidException, JsonProcessingException {
         Coach coach = coachService.getCoachByIdAccount(request.getIdAccount());
-        ClassSession classSession = classSessionService.getClassSessionById(request.getIdClassSession());
-        LocalDate attendanceDate = ConverterUtils.instantToLocalDate(request.getCreatedAt());
+
+        classSessionService.validateClassSessionExists(request.getIdClassSession());
+
+        LocalDate attendanceDate = ConverterUtils.localDateTimeToLocalDate(request.getCreatedAt());
 
         CoachAttendance coachAttendance = new CoachAttendance();
-        coachAttendance.setCoach(coach);
-        coachAttendance.setClassSession(classSession);
+        coachAttendance.setIdUser(coach.getIdUser());
+        coachAttendance.setIdClassSession(request.getIdClassSession());
         coachAttendance.setCreatedAt(request.getCreatedAt());
 
         if (request.getFileName() != null) {

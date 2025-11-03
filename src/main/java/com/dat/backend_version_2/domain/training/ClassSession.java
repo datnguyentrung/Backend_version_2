@@ -41,11 +41,11 @@ public class ClassSession {
     @JoinColumn(name = "branch", referencedColumnName = "idBranch")
     private Branch branch;
 
-    @OneToMany(mappedBy = "classSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "classSession", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private List<CoachClassSession> coachClassSessions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "classSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "classSession", cascade = CascadeType.REMOVE, orphanRemoval = true) // ✅ SỬA ĐỔI: Chỉ giữ lại REMOVE
     @JsonIgnore
     private List<StudentClassSession> studentClassSessions = new ArrayList<>();
 }

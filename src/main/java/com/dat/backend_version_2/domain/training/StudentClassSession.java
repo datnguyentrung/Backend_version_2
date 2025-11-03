@@ -25,15 +25,13 @@ public class StudentClassSession {
     @Column(name = "idClassSession")
     private String idClassSession;
 
-    @ManyToOne
-    @MapsId("idUser")
-    @JoinColumn(name = "idUser", referencedColumnName = "idUser")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idUser", referencedColumnName = "idUser", insertable = false, updatable = false)
     @JsonIgnore
     private Student student;
 
-    @ManyToOne
-    @MapsId("idClassSession")
-    @JoinColumn(name = "idClassSession", referencedColumnName = "idClassSession")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idClassSession", referencedColumnName = "idClassSession", insertable = false, updatable = false)
     @JsonIgnore
     private ClassSession classSession;
 }

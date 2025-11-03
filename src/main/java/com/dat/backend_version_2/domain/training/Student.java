@@ -37,7 +37,7 @@ public class Student extends Users {
     @Enumerated(EnumType.STRING)
     private BeltLevel beltLevel = BeltLevel.C10;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true) // ✅ SỬA ĐỔI
     @JsonIgnore
     private List<StudentClassSession> studentClassSessions = new ArrayList<>();
 

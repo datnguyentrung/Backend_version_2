@@ -37,13 +37,11 @@ public class StudentAttendance extends BaseAttendance {
     @Column(name = "attendance_date")
     private LocalDate attendanceDate;
 
-    @MapsId("idUser")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id_user")
+    @JoinColumn(name = "student_id_user", insertable = false, updatable = false)
     private Student student;
 
-    @MapsId("idClassSession")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "class_session")
+    @JoinColumn(name = "class_session", insertable = false, updatable = false)
     private ClassSession classSession;
 }
