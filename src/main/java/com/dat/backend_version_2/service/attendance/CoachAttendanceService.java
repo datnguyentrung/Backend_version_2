@@ -5,6 +5,7 @@ import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.domain.training.Coach;
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceRes;
+import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
 import com.dat.backend_version_2.mapper.attendance.CoachAttendanceMapper;
 import com.dat.backend_version_2.repository.attendance.CoachAttendanceRepository;
 import com.dat.backend_version_2.service.training.ClassSessionService;
@@ -16,6 +17,7 @@ import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,15 +35,15 @@ public class CoachAttendanceService {
     private final CoachAttendanceRepository coachAttendanceRepository;
     private final CoachService coachService;
     private final ClassSessionService classSessionService;
-    private final StudentAttendanceService studentAttendanceService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void markCoachAttendance(CoachAttendanceDTO.CreateRequest request) throws IdInvalidException, JsonProcessingException {
-        Coach coach = coachService.getCoachByIdAccount(request.getIdAccount());
+    public void markCoachAttendance(CoachAttendanceDTO.CreateRequest request) throws IdInvalidException {
+        Coach coach = coachService.getAndValidateActiveCoach(UUID.fromString(request.getIdUser()));
 
-        classSessionService.validateClassSessionExists(request.getIdClassSession());
+        classSessionService.validateActiveClassSession(request.getIdClassSession());
 
-        LocalDate attendanceDate = ConverterUtils.localDateTimeToLocalDate(request.getCreatedAt());
+        LocalDate attendanceDate = request.getCreatedAt().toLocalDate();
 
         CoachAttendance coachAttendance = new CoachAttendance();
         coachAttendance.setIdUser(coach.getIdUser());
@@ -52,10 +55,10 @@ public class CoachAttendanceService {
         }
         coachAttendanceRepository.save(coachAttendance);
 
-        studentAttendanceService.createAttendancesByClassSessionAndDate(
-                request.getIdClassSession(),
-                attendanceDate,
-                request.getIdAccount()
+        eventPublisher.publishEvent(new StudentAttendanceDTO.StudentAttendanceClassSession(
+                        request.getIdClassSession(),
+                        attendanceDate
+                )
         );
     }
 

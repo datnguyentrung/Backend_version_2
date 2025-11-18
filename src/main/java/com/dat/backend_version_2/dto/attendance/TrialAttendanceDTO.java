@@ -6,6 +6,8 @@ import com.dat.backend_version_2.enums.attendance.EvaluationStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
+
 @Data
 public class TrialAttendanceDTO {
     @Data
@@ -20,15 +22,10 @@ public class TrialAttendanceDTO {
         private EvaluationStatus evaluationStatus;
     }
 
-    @Data
-    public static class CreateTrialAttendance{
-        private AttendanceDTO.TrialAttendanceKey attendanceKey;
-        private AttendanceDTO.AttendanceInfo attendanceInfo;
-    }
-
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class TrialAttendanceDetail extends CreateTrialAttendance{
+    public static class TrialAttendanceDetail extends AttendanceDTO.AttendanceInfo{
         private RegistrationDTO registrationDTO;
+        private LocalDate attendanceDate;
     }
 }

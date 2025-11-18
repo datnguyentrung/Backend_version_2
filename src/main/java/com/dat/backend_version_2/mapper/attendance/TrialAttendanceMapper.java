@@ -6,6 +6,7 @@ import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.TrialAttendanceDTO;
 import com.dat.backend_version_2.mapper.registration.RegistrationMapper;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,10 +18,10 @@ public class TrialAttendanceMapper {
             return null;
         }
         TrialAttendance attendance = new TrialAttendance();
-        attendance.setAttendanceStatus(attendanceInfo.getAttendanceStatus());
-        attendance.setAttendanceTime(LocalDateTime.now());
+        attendance.setAttendanceStatus(attendanceInfo.getAttendance().getAttendanceStatus());
+        attendance.setAttendanceTime(LocalTime.now());
 
-        attendance.setEvaluationStatus(attendanceInfo.getEvaluationStatus());
+        attendance.setEvaluationStatus(attendanceInfo.getEvaluation().getEvaluationStatus());
         attendance.setNotes(attendanceInfo.getNotes());
 
         return attendance;
@@ -31,12 +32,34 @@ public class TrialAttendanceMapper {
             return null;
         }
         AttendanceDTO.AttendanceInfo attendanceInfo = new AttendanceDTO.AttendanceInfo();
-        attendanceInfo.setAttendanceDate(trialAttendance.getAttendanceDate());
-        attendanceInfo.setAttendanceStatus(trialAttendance.getAttendanceStatus());
-        attendanceInfo.setEvaluationStatus(trialAttendance.getEvaluationStatus());
+        attendanceInfo.setAttendance(trialAttendanceToAttendanceDetail(trialAttendance));
+        attendanceInfo.setEvaluation(trialAttendanceToEvaluationDetail(trialAttendance));
         attendanceInfo.setNotes(trialAttendance.getNotes());
 
         return attendanceInfo;
+    }
+
+    public static AttendanceDTO.AttendanceDetail trialAttendanceToAttendanceDetail(TrialAttendance trialAttendance) {
+        if (trialAttendance == null) {
+            return null;
+        }
+        AttendanceDTO.AttendanceDetail attendanceDetail = new AttendanceDTO.AttendanceDetail();
+        attendanceDetail.setAttendanceTime(
+                trialAttendance.getAttendanceTime() != null ?
+                        trialAttendance.getAttendanceTime() :
+                        null
+        );
+        attendanceDetail.setAttendanceStatus(trialAttendance.getAttendanceStatus());
+        return attendanceDetail;
+    }
+
+    public static AttendanceDTO.EvaluationDetail trialAttendanceToEvaluationDetail(TrialAttendance trialAttendance) {
+        if (trialAttendance == null) {
+            return null;
+        }
+        AttendanceDTO.EvaluationDetail evaluationDetail = new AttendanceDTO.EvaluationDetail();
+        evaluationDetail.setEvaluationStatus(trialAttendance.getEvaluationStatus());
+        return evaluationDetail;
     }
 
     public static AttendanceDTO.TrialAttendanceKey trialAttendanceToAttendanceKey(TrialAttendance trialAttendance) {
@@ -50,23 +73,16 @@ public class TrialAttendanceMapper {
         return attendanceKey;
     }
 
-    private static void fillBaseAttendance(TrialAttendance source, TrialAttendanceDTO.CreateTrialAttendance target) {
-        target.setAttendanceKey(trialAttendanceToAttendanceKey(source));
-        target.setAttendanceInfo(trialAttendanceToAttendanceInfo(source));
-    }
-
-    public static TrialAttendanceDTO.CreateTrialAttendance trialAttendanceToCreateAttendance(TrialAttendance s) {
-        if (s == null) return null;
-        var dto = new TrialAttendanceDTO.CreateTrialAttendance();
-        fillBaseAttendance(s, dto);
-        return dto;
-    }
 
     public static TrialAttendanceDTO.TrialAttendanceDetail trialAttendanceToTrialAttendanceDetail(TrialAttendance s) {
         if (s == null) return null;
+        AttendanceDTO.AttendanceInfo attendanceInfo = trialAttendanceToAttendanceInfo(s);
         var dto = new TrialAttendanceDTO.TrialAttendanceDetail();
-        fillBaseAttendance(s, dto);
+        BeanUtils.copyProperties(attendanceInfo, dto);
         dto.setRegistrationDTO(RegistrationMapper.registrationToRegistrationDTO(s.getRegistration()));
+        dto.setAttendanceDate(s.getAttendanceDate());
+        dto.setIdClassSession(s.getIdClassSession());
+        dto.setIdAccount(s.getRegistration().getIdRegistration().toString());
         return dto;
     }
 }

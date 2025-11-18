@@ -36,5 +36,5 @@ public class Registration {
     private LocalDate registrationDate;
 
     @Enumerated(EnumType.STRING)
-    private RegistrationStatus registrationStatus = RegistrationStatus.REGISTERED;
+    private RegistrationStatus registrationStatus = RegistrationStatus.ENROLLED;
 }

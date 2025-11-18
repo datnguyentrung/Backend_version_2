@@ -15,6 +15,7 @@ public interface FeatureRepository extends JpaRepository<Feature, UUID> {
             SELECT DISTINCT f FROM Feature f
                         JOIN FETCH f.featureRoles fr
                         JOIN FETCH fr.role r
+            WHERE f.enabled = true
             """)
-    List<Feature> findAllWithRoles();
+    List<Feature> findAllEnabledWithRoles();
 }

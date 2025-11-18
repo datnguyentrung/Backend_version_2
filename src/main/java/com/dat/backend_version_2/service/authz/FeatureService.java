@@ -41,9 +41,9 @@ public class FeatureService {
         return featureRepository.save(feature);
     }
 
-    public List<FeatureRes.BasicInfo> getAllFeatures() {
-        return featureRepository.findAllWithRoles().stream()
-                .map(FeatureMapper::featureToBasicInfo)
+    public List<FeatureRes> getAllEnabledFeatures() {
+        return featureRepository.findAllEnabledWithRoles().stream()
+                .map(FeatureMapper::featureToFeatureRes)
                 .toList();
     }
 }

@@ -20,6 +20,12 @@ public class CacheTtlConfig {
     @Value("${cache.ttl.one-month-seconds}")
     private long oneMonthSeconds;
 
+    public Duration randomOneHour() {
+        // 1 giờ + random 0-5 phút
+        long extra = ThreadLocalRandom.current().nextLong(0, 300);
+        return Duration.ofSeconds(3600 + extra);
+    }
+
     public Duration randomOneDay() {
         // 1 ngày + random 0-1h
         long extra = ThreadLocalRandom.current().nextLong(0, 3600);

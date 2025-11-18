@@ -20,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "StudentAttendance", schema = "attendance",
         indexes = {
-            @Index(name = "idx_class_session", columnList = "class_session")
+            @Index(name = "idx_session_date", columnList = "class_session, attendance_date")
         }
 )
 @IdClass(AttendanceDTO.StudentAttendanceKey.class)

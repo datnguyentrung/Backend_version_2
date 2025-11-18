@@ -19,4 +19,5 @@ public class CoachAttendanceListener {
     public void setCoachAttendanceRedis(CoachAttendanceRedis redis) {
         coachAttendanceRedis = redis;
     }
+
 }

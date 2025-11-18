@@ -11,12 +11,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controller xử lý điểm danh huấn luyện viên
@@ -38,13 +40,17 @@ public class CoachAttendanceController {
      */
     @PostMapping
     public ResponseEntity<String> createCoachAttendance(
-            @RequestBody CoachAttendanceDTO.CreateRequest createRequest) throws IdInvalidException, JsonProcessingException {
+            @RequestBody CoachAttendanceDTO.CreateRequest createRequest,
+            Authentication authentication) throws IdInvalidException, JsonProcessingException {
+        String idUser = authentication.getName();
+
+        createRequest.setIdUser(idUser);
         coachAttendanceService.markCoachAttendance(createRequest);
 
-        LocalDate date = ConverterUtils.localDateTimeToLocalDate(createRequest.getCreatedAt());
+        LocalDate date = createRequest.getCreatedAt().toLocalDate();
 
         String key = coachAttendanceRedis.getKeyByIdCoachAndYearAndMonth(
-                createRequest.getIdAccount(),
+                idUser,
                 date.getYear(),
                 date.getMonthValue());
 

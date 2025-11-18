@@ -3,9 +3,12 @@ package com.dat.backend_version_2.mapper.attendance;
 import com.dat.backend_version_2.domain.attendance.StudentAttendance;
 import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
+import com.dat.backend_version_2.enums.attendance.AttendanceStatus;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class StudentAttendanceMapper {
     public static AttendanceDTO.StudentAttendanceKey studentAttendanceToAttendanceKey(StudentAttendance studentAttendance) {
@@ -24,30 +27,65 @@ public class StudentAttendanceMapper {
             return null;
         }
         AttendanceDTO.AttendanceInfo attendanceInfo = new AttendanceDTO.AttendanceInfo();
-        attendanceInfo.setAttendanceDate(studentAttendance.getAttendanceDate());
-        attendanceInfo.setAttendanceStatus(studentAttendance.getAttendanceStatus());
-        attendanceInfo.setEvaluationStatus(studentAttendance.getEvaluationStatus());
+        attendanceInfo.setAttendance(studentAttendanceToAttendanceDetail(studentAttendance));
+        attendanceInfo.setEvaluation(studentAttendanceToEvaluationDetail(studentAttendance));
         attendanceInfo.setNotes(studentAttendance.getNotes());
         return attendanceInfo;
     }
 
-    private static void fillBaseAttendance(StudentAttendance source, StudentAttendanceDTO.CreateStudentAttendance target) {
-        target.setAttendanceKey(studentAttendanceToAttendanceKey(source));
-        target.setAttendanceInfo(studentAttendanceToAttendanceInfo(source));
+    public static AttendanceDTO.AttendanceDetail studentAttendanceToAttendanceDetail(StudentAttendance studentAttendance) {
+        if (studentAttendance == null) {
+            return null;
+        }
+        AttendanceDTO.AttendanceDetail attendanceDetail = new AttendanceDTO.AttendanceDetail();
+        attendanceDetail.setAttendanceTime(
+                studentAttendance.getAttendanceTime() != null ?
+                        studentAttendance.getAttendanceTime() :
+                        null
+        );
+        attendanceDetail.setAttendanceStatus(studentAttendance.getAttendanceStatus());
+        if (studentAttendance.getAttendanceStatus() == AttendanceStatus.V ||
+                studentAttendance.getAttendanceStatus() == AttendanceStatus.P) {
+            return attendanceDetail;
+        }
+        attendanceDetail.setCoach(
+                new AttendanceDTO.CoachReference(
+                        studentAttendance.getAttendanceCoach().getIdAccount(),
+                        studentAttendance.getAttendanceCoach().getName()
+                )
+        );
+        return attendanceDetail;
     }
 
-    public static StudentAttendanceDTO.CreateStudentAttendance studentAttendanceToCreateAttendance(StudentAttendance s) {
-        if (s == null) return null;
-        var dto = new StudentAttendanceDTO.CreateStudentAttendance();
-        fillBaseAttendance(s, dto);
-        return dto;
+    public static AttendanceDTO.EvaluationDetail studentAttendanceToEvaluationDetail(StudentAttendance studentAttendance) {
+        if (studentAttendance == null) {
+            return null;
+        }
+        AttendanceDTO.EvaluationDetail evaluationDetail = new AttendanceDTO.EvaluationDetail();
+        evaluationDetail.setEvaluationStatus(studentAttendance.getEvaluationStatus());
+        if (studentAttendance.getEvaluationCoach() == null) {
+            return evaluationDetail;
+        }
+
+        evaluationDetail.setCoach(
+                new AttendanceDTO.CoachReference(
+                        studentAttendance.getEvaluationCoach().getIdAccount(),
+                        studentAttendance.getEvaluationCoach().getName()
+                )
+        );
+        return evaluationDetail;
     }
 
     public static StudentAttendanceDTO.StudentAttendanceDetail studentAttendanceToStudentAttendanceDetail(StudentAttendance s) {
         if (s == null) return null;
+
+        AttendanceDTO.AttendanceInfo attendanceInfo = studentAttendanceToAttendanceInfo(s);
         var dto = new StudentAttendanceDTO.StudentAttendanceDetail();
-        fillBaseAttendance(s, dto);
+        BeanUtils.copyProperties(attendanceInfo, dto);
+        dto.setAttendanceDate(s.getAttendanceDate());
         dto.setPersonalAcademicInfo(StudentMapper.studentToPersonalAcademicInfo(s.getStudent()));
+        dto.setIdAccount(s.getStudent().getIdAccount());
+        dto.setIdClassSession(s.getIdClassSession());
         return dto;
     }
 
@@ -56,10 +94,9 @@ public class StudentAttendanceMapper {
             return null;
         }
         StudentAttendance studentAttendance = new StudentAttendance();
-        studentAttendance.setAttendanceDate(attendanceInfo.getAttendanceDate());
-        studentAttendance.setAttendanceTime(LocalDateTime.now());
-        studentAttendance.setAttendanceStatus(attendanceInfo.getAttendanceStatus());
-        studentAttendance.setEvaluationStatus(attendanceInfo.getEvaluationStatus());
+        studentAttendance.setAttendanceTime(LocalTime.now());
+        studentAttendance.setAttendanceStatus(attendanceInfo.getAttendance().getAttendanceStatus());
+        studentAttendance.setEvaluationStatus(attendanceInfo.getEvaluation().getEvaluationStatus());
         studentAttendance.setNotes(attendanceInfo.getNotes());
         return studentAttendance;
     }

@@ -2,6 +2,7 @@ package com.dat.backend_version_2.controller.authentication;
 
 import com.dat.backend_version_2.domain.authentication.UserTokens;
 import com.dat.backend_version_2.domain.authentication.Users;
+import com.dat.backend_version_2.domain.training.Student;
 import com.dat.backend_version_2.dto.authentication.LoginReq;
 import com.dat.backend_version_2.dto.authentication.LoginRes;
 import com.dat.backend_version_2.service.authentication.UserTokensService;
@@ -58,12 +59,14 @@ public class AuthenticationController {
 
         LoginRes loginRes = new LoginRes();
         Users currentUserDB = userService.getUserByIdAccount(loginReq.getIdAccount());
+
         if (currentUserDB != null) {
             LoginRes.UserLogin userLogin = new LoginRes.UserLogin(
                     // .get phải thứ tự UserLogin
                     currentUserDB.getIdAccount(),
                     currentUserDB.getStatus(),
-                    currentUserDB.getRole().getIdRole()
+                    currentUserDB.getRole().getIdRole(),
+                    currentUserDB.getCreatedAt().toString()
             );
             loginRes.setUser(userLogin);
         }
@@ -138,7 +141,8 @@ public class AuthenticationController {
             LoginRes.UserLogin userLogin = new LoginRes.UserLogin(
                     userDB.getIdAccount(),
                     userDB.getStatus(),
-                    userDB.getRole().getIdRole()
+                    userDB.getRole().getIdRole(),
+                    userDB.getCreatedAt().toString()
             );
             loginRes.setUser(userLogin);
         }

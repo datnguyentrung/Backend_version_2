@@ -14,24 +14,27 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "StudentClassSession",
+        indexes = {
+                @Index(name = "idx_class_session", columnList = "id_class_session"),
+        },
         schema = "training")
 @IdClass(StudentClassSessionId.class)
 public class StudentClassSession {
     @Id
-    @Column(name = "idUser")
+    @Column(name = "id_user")
     private UUID idUser;
 
     @Id
-    @Column(name = "idClassSession")
+    @Column(name = "id_class_session")
     private String idClassSession;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idUser", referencedColumnName = "idUser", insertable = false, updatable = false)
+    @JoinColumn(name = "id_user", insertable = false, updatable = false)
     @JsonIgnore
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idClassSession", referencedColumnName = "idClassSession", insertable = false, updatable = false)
+    @JoinColumn(name = "id_class_session", insertable = false, updatable = false)
     @JsonIgnore
     private ClassSession classSession;
 }

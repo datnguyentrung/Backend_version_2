@@ -9,7 +9,9 @@ import com.dat.backend_version_2.service.authentication.UsersService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -31,8 +33,8 @@ public class CoachService {
         return coachRepository.save(coach);
     }
 
-    public Coach getCoachById(String idUser) throws IdInvalidException {
-        return coachRepository.findById(UUID.fromString(idUser))
+    public Coach getCoachById(UUID idUser) throws IdInvalidException {
+        return coachRepository.findById(idUser)
                 .orElseThrow(() -> new IdInvalidException("Coach not found with id: " + idUser));
     }
 
@@ -44,6 +46,36 @@ public class CoachService {
                     .orElseThrow(() -> new UserNotFoundException("Coach not found with id: " + idAccount));
             coachRedis.saveCoachByIdAccount(idAccount, coach);
         }
+        return coach;
+    }
+
+    public Coach getAndValidateActiveCoach(UUID idUser) throws IdInvalidException {
+        // 1. Dùng lại hàm get cũ
+        Coach coach = getCoachById(idUser);
+
+        // 2. Tập trung logic kiểm tra active vào đây
+        if (!coach.getIsActive()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Coach no longer have permission to use this feature"
+            );
+        }
+
+        return coach;
+    }
+
+    public Coach getAndValidateActiveCoach(String idAccount) throws UserNotFoundException, ResponseStatusException, IdInvalidException {
+        // 1. Dùng lại hàm get cũ
+        Coach coach = getCoachByIdAccount(idAccount);
+
+        // 2. Tập trung logic kiểm tra active vào đây
+        if (!coach.getIsActive()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Coach no longer have permission to use this feature"
+            );
+        }
+
         return coach;
     }
 }

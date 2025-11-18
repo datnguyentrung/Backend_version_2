@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @MappedSuperclass
@@ -16,7 +17,7 @@ public abstract class BaseAttendance {
     @Column(nullable = false)
     private AttendanceStatus attendanceStatus = AttendanceStatus.V;
 
-    private LocalDateTime attendanceTime = LocalDateTime.now();
+    private LocalTime attendanceTime = LocalTime.now();
 
     @ManyToOne
     @JoinColumn(name = "attendance_coach_id_user")

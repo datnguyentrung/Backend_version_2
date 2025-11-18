@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class UsersController {
                 yield ResponseEntity.ok(StudentMapper.studentToUserRes(student));
             }
             case "COACH" -> {
-                Coach coach = coachService.getCoachById(idUser);
+                Coach coach = coachService.getCoachById(UUID.fromString(idUser));
                 yield ResponseEntity.ok(CoachMapper.coachToUserRes(coach));
             }
             default -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

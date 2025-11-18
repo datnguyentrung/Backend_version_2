@@ -6,6 +6,7 @@ import com.dat.backend_version_2.dto.authz.Feature.FeatureRes;
 import com.dat.backend_version_2.mapper.authz.FeatureMapper;
 import com.dat.backend_version_2.redis.authz.FeatureRedisImpl;
 import com.dat.backend_version_2.service.authz.FeatureService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +32,13 @@ public class FeatureController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FeatureRes.BasicInfo>> getAllFeatures() {
+    public ResponseEntity<List<FeatureRes>> getAllFeatures() throws JsonProcessingException {
 //        return ResponseEntity.status(HttpStatus.OK)
 //                .body(featureService.getAllFeatures());
-        List<FeatureRes.BasicInfo> features = featureRedis.getAllFeatures();
+        List<FeatureRes> features = featureRedis.getAllEnabledFeatures();
         if (features == null) {
-            features = featureService.getAllFeatures();
-            featureRedis.saveAllFeatures(features);
+            features = featureService.getAllEnabledFeatures();
+            featureRedis.saveAllEnabledFeatures(features);
         }
         return ResponseEntity.ok(features);
     }

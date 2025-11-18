@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 public class LoginRes {
     @JsonProperty("access_token")
@@ -24,6 +26,7 @@ public class LoginRes {
         private String idAccount;
         private UserStatus status;
         private String role;
+        private String startDate;
 
         @Override
         public String toString() {

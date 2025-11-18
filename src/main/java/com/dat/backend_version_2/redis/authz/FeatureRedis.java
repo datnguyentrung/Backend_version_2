@@ -8,8 +8,8 @@ import java.util.List;
 public interface FeatureRedis {
     void clear();
 
-    List<FeatureRes.BasicInfo> getAllFeatures() throws JsonProcessingException;
+    List<FeatureRes> getAllEnabledFeatures() throws JsonProcessingException;
 
-    void saveAllFeatures(List<FeatureRes.BasicInfo> features
+    void saveAllEnabledFeatures(List<FeatureRes> features
     ) throws JsonProcessingException;
 }

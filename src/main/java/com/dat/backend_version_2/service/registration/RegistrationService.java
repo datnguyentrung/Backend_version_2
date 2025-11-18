@@ -53,6 +53,16 @@ public class RegistrationService {
                 .orElseThrow(() -> new IdInvalidException("Không tìm thấy registration với ID: " + idRegistration));
     }
 
+    public void getAndValidateRegisterdRegistration(String idRegistration) throws IdInvalidException {
+        Registration registration = getRegistrationById(idRegistration);
+        if (registration.getRegistrationStatus() == RegistrationStatus.REGISTERED) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Registration is in REGISTERD status for id: " + idRegistration
+            );
+        }
+    }
+
     public void updateRegistration(
             String idRegistration,
             RegistrationDTO.PersonalInfo personalInfo) throws IdInvalidException {

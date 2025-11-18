@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,4 +47,29 @@ public interface StudentAttendanceRepository extends JpaRepository<StudentAttend
     );
 
     Boolean existsByStudentAndClassSessionAndAttendanceDate(Student student, ClassSession classSession, LocalDate attendanceDate);
+
+    @Query("""
+            SELECT sa
+            FROM StudentAttendance sa
+            JOIN sa.classSession cs
+            WHERE sa.student = :student
+              AND YEAR(sa.attendanceDate) = :year
+              AND MONTH(sa.attendanceDate) IN :months
+            """)
+    List<StudentAttendance> findByStudentAndYearAndQuarter(
+            @Param("student") Student student,
+            @Param("year") Integer year,
+            @Param("months") List<Integer> months
+    );
+
+    @Query("""
+            SELECT sa
+            FROM StudentAttendance sa
+            WHERE sa.student.idAccount = :#{#attendanceKey.idAccount}
+              AND sa.idClassSession = :#{#attendanceKey.idClassSession}
+              AND sa.attendanceDate = :#{#attendanceKey.attendanceDate}
+            """)
+    Optional<StudentAttendance> findByStudentAttendanceAccountKey(
+            @Param("attendanceKey") AttendanceDTO.StudentAttendanceAccountKey attendanceKey
+    );
 }

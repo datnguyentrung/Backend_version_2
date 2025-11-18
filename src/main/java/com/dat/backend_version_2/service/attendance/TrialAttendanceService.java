@@ -33,36 +33,22 @@ public class TrialAttendanceService {
     private final CoachService coachService;
 
     @Transactional
-    public void markAttendance(TrialAttendanceDTO.CreateTrialAttendance attendanceDTO, String idUser
+    public void markAttendance(AttendanceDTO.AttendanceInfo request, String idUser
     ) throws IdInvalidException, JsonProcessingException {
-        AttendanceDTO.TrialAttendanceKey attendanceKey = attendanceDTO.getAttendanceKey();
-        AttendanceDTO.AttendanceInfo attendanceInfo = attendanceDTO.getAttendanceInfo();
 
-        ClassSession classSession = classSessionService
-                .getClassSessionById(attendanceKey.getIdClassSession());
+        classSessionService.validateActiveClassSession(request.getIdClassSession());
 
-        if (!classSession.getIsActive()) {
-            throw new RuntimeException("ClassSession is not active");
-        }
+        registrationService.getAndValidateRegisterdRegistration(request.getIdAccount());
 
-        Registration registration = registrationService
-                .getRegistrationById(attendanceInfo.getIdAccount());
-
-        Coach coach = coachService.getCoachById(idUser);
-        if (!coach.getIsActive()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Coach no longer have permission to use this feature"
-            );
-        }
+        Coach coach = coachService.getAndValidateActiveCoach(UUID.fromString(idUser));
 
         TrialAttendance trialAttendance = TrialAttendanceMapper
-                .attendanceInfoToTrialAttendance(attendanceDTO.getAttendanceInfo());
-        trialAttendance.setClassSession(classSession);
-        trialAttendance.setRegistration(registration);
+                .attendanceInfoToTrialAttendance(request);
+        trialAttendance.setIdClassSession(request.getIdClassSession());
+        trialAttendance.setIdRegistration(UUID.fromString(request.getIdAccount()));
         trialAttendance.setAttendanceCoach(coach);
         trialAttendance.setAttendanceDate(LocalDate.now());
-        if (attendanceDTO.getAttendanceInfo().getEvaluationStatus() != null) {
+        if (request.getEvaluation().getEvaluationStatus() != null) {
             trialAttendance.setEvaluationCoach(coach);
         }
 
@@ -81,7 +67,7 @@ public class TrialAttendanceService {
                 .orElseThrow(() -> new IdInvalidException("TrialAttendance not found with key: " + key));
     }
 
-    public void markEvaluation(TrialAttendanceDTO.TrialMarkEvaluation markEvaluation, String idAccount
+    public void markEvaluation(TrialAttendanceDTO.TrialMarkEvaluation markEvaluation, String idUser
     ) throws IdInvalidException {
         TrialAttendance trialAttendance = getTrialAttendanceById(markEvaluation.getAttendanceKey());
 
@@ -93,7 +79,7 @@ public class TrialAttendanceService {
             );
         }
 
-        Coach coach = coachService.getCoachById(idAccount);
+        Coach coach = coachService.getCoachById(UUID.fromString(idUser));
         if (!coach.getIsActive()) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,

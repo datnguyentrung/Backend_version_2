@@ -1,10 +1,12 @@
 package com.dat.backend_version_2.redis.authz;
 
 import com.dat.backend_version_2.dto.authz.Feature.FeatureRes;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lettuce.core.RedisClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,17 +14,17 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FeatureRedisImpl implements FeatureRedis {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     private final ObjectMapper redisObjectMapper;
 
     @Override
-    public List<FeatureRes.BasicInfo> getAllFeatures()  {
+    public List<FeatureRes> getAllEnabledFeatures() {
         String key = "features:all";
-        String json = (String) redisTemplate.opsForValue().get(key);
+        String json = stringRedisTemplate.opsForValue().get(key);
         try {
             return json != null ?
-                    redisObjectMapper.readValue(json, redisObjectMapper.getTypeFactory().constructCollectionType(List.class, FeatureRes.BasicInfo.class))
+                    redisObjectMapper.readValue(json, redisObjectMapper.getTypeFactory().constructCollectionType(List.class, FeatureRes.class))
                     : null;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -30,8 +32,8 @@ public class FeatureRedisImpl implements FeatureRedis {
     }
 
     @Override
-    public void clear(){
-        var connectionFactory = redisTemplate.getConnectionFactory();
+    public void clear() {
+        var connectionFactory = stringRedisTemplate.getConnectionFactory();
         if (connectionFactory != null) {
             try (var connection = connectionFactory.getConnection()) {
                 connection.serverCommands().flushDb(); // chỉ xóa DB hiện tại
@@ -41,11 +43,11 @@ public class FeatureRedisImpl implements FeatureRedis {
 
     @Override
     // Save all features to Redis
-    public void saveAllFeatures(List<FeatureRes.BasicInfo> features)  {
+    public void saveAllEnabledFeatures(List<FeatureRes> features) throws JsonProcessingException {
         String key = "features:all";
         try {
             String json = redisObjectMapper.writeValueAsString(features);
-            redisTemplate.opsForValue().set(key, json);
+            stringRedisTemplate.opsForValue().set(key, json);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

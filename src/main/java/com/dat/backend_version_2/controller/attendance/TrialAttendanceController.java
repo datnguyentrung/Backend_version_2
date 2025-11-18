@@ -23,14 +23,14 @@ public class TrialAttendanceController {
 
     @PostMapping
     public ResponseEntity<String> createTrialAttendance(
-            @RequestBody @Valid TrialAttendanceDTO.CreateTrialAttendance attendanceDTO,
+            @RequestBody @Valid AttendanceDTO.AttendanceInfo attendanceDTO,
             Authentication authentication) {
         String idUser = authentication.getName();
 
         try {
             trialAttendanceService.markAttendance(attendanceDTO, idUser);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Điểm danh thử thành công cho học viên: " + attendanceDTO.getAttendanceInfo().getIdAccount());
+                    .body("Điểm danh thử thành công cho học viên: " + attendanceDTO.getIdAccount());
         } catch (IdInvalidException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (ResponseStatusException e) {

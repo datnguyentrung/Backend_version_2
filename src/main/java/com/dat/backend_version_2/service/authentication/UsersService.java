@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,7 +71,7 @@ public class UsersService {
         user.setIdAccount(idAccount);
         user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setStatus(UserStatus.ACTIVE);
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(LocalDate.now());
     }
 
     // Lấy user theo idAccount (dành cho authentication)

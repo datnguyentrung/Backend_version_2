@@ -15,10 +15,7 @@ public class RegistrationMapper {
             return null;
         }
         Registration registration = new Registration();
-        registration.setName(personalInfo.getName());
-        registration.setBirthDate(personalInfo.getBirthDate());
-        registration.setPhone(personalInfo.getPhone());
-        registration.setReferredBy(personalInfo.getReferredBy());
+        updatePersonalInfo(registration, personalInfo);
         return registration;
     }
 

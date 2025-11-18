@@ -38,4 +38,14 @@ public class FeatureMapper {
 
         return basicInfo;
     }
+
+    public static FeatureRes featureToFeatureRes(Feature feature) {
+        if (feature == null) {
+            return null;
+        }
+        FeatureRes featureRes = new FeatureRes();
+        featureRes.setIdFeature(feature.getIdFeature());
+        featureRes.setBasicInfo(featureToBasicInfo(feature));
+        return featureRes;
+    }
 }

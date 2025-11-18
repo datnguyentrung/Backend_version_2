@@ -32,4 +32,13 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
     List<Student> findAllByIdClassSession(@Param("classSession") ClassSession classSession);
 
     Optional<Student> findByIdAccount(String idAccount);
+    /**
+     * Checks if a student exists and is active by account ID
+     * @param idAccount the account ID to check
+     * @param isActive the active status to check
+     * @return true if a student with the given account ID and active status exists, false otherwise
+     */
+    boolean existsByIdAccountAndIsActive(String idAccount, Boolean isActive);
+
+    Optional<Student> findByIdAccountAndIsActive(String idAccount, Boolean isActive);
 }

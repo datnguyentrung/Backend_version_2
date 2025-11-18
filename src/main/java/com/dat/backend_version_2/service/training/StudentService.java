@@ -3,19 +3,18 @@ package com.dat.backend_version_2.service.training;
 import com.dat.backend_version_2.domain.training.Branch;
 import com.dat.backend_version_2.domain.training.ClassSession;
 import com.dat.backend_version_2.domain.training.Student;
-import com.dat.backend_version_2.domain.training.StudentClassSession;
 import com.dat.backend_version_2.dto.training.Student.StudentReq;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
-import com.dat.backend_version_2.dto.training.StudentClassSession.StudentClassSessionReq;
 import com.dat.backend_version_2.enums.training.BeltLevel;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
-import com.dat.backend_version_2.repository.training.BranchRepository;
 import com.dat.backend_version_2.repository.training.StudentRepository;
 import com.dat.backend_version_2.service.authentication.UsersService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,12 +24,39 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StudentService {
     private final StudentRepository studentRepository;
     private final BranchService branchService;
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
     private final StudentClassSessionService studentClassSessionService;
+
+    /**
+     * Asserts that a student exists and is active by account ID.
+     *
+     * @param idAccount the account ID to check.
+     * @throws IllegalArgumentException if idAccount is null or empty.
+     * @throws ResourceNotFoundException if student does not exist or is inactive.
+     */
+    public void assertStudentIsActive(String idAccount) {
+        // 1. Kiểm tra tham số đầu vào (Input Validation)
+        if (idAccount == null || idAccount.trim().isEmpty()) {
+            throw new IllegalArgumentException("Account ID cannot be null or empty");
+        }
+
+        // 2. Gọi Repository để kiểm tra
+        boolean existsAndActive = studentRepository.existsByIdAccountAndIsActive(idAccount, true);
+
+        // 3. Assertion (Kiểm tra điều kiện)
+        if (!existsAndActive) {
+            // Ném ra Exception phù hợp khi điều kiện nghiệp vụ không được thỏa mãn
+            log.warn("Attempted to access data for inactive/non-existent student with ID: {}", idAccount);
+            throw new ResourceNotFoundException("Student with ID " + idAccount + " not found or is inactive.");
+        }
+
+        // Nếu check thành công, hàm kết thúc bình thường (void)
+    }
 
     public Student createStudent(StudentReq.StudentInfo studentInfo) throws IdInvalidException, JsonProcessingException {
         Student student = new Student();
@@ -105,4 +131,24 @@ public class StudentService {
         return studentRepository.findByIdAccount(idAccount)
                 .orElseThrow(() -> new UserNotFoundException("Student not found with id: " + idAccount));
     }
+
+    /**
+     * Gets an active student by account ID
+     *
+     * @param idAccount the account ID to search for
+     * @return the active student
+     * @throws IllegalArgumentException if idAccount is null or empty
+     * @throws UserNotFoundException if no active student found with the given account ID
+     */
+    public Student getActiveStudentByIdAccount(String idAccount) throws IllegalArgumentException, UserNotFoundException {
+        if (idAccount == null || idAccount.trim().isEmpty()) {
+            throw new IllegalArgumentException("Account ID cannot be null or empty");
+        }
+
+        return studentRepository.findByIdAccountAndIsActive(idAccount, true)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "No active student found with account ID: " + idAccount
+                ));
+    }
 }
+
