@@ -2,9 +2,12 @@ package com.dat.backend_version_2.controller.attendance;
 
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.CoachAttendanceRes;
+import com.dat.backend_version_2.dto.authentication.LoginRes;
+import com.dat.backend_version_2.enums.authentication.UserStatus;
 import com.dat.backend_version_2.redis.attendance.CoachAttendanceRedisImpl;
 import com.dat.backend_version_2.service.attendance.CoachAttendanceService;
 import com.dat.backend_version_2.util.ConverterUtils;
+import com.dat.backend_version_2.util.SecurityUtil;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -41,8 +46,32 @@ public class CoachAttendanceController {
     @PostMapping
     public ResponseEntity<String> createCoachAttendance(
             @RequestBody CoachAttendanceDTO.CreateRequest createRequest,
+            @AuthenticationPrincipal Jwt jwt,
             Authentication authentication) throws IdInvalidException, JsonProcessingException {
         String idUser = authentication.getName();
+
+        LoginRes.UserLogin userLogin = SecurityUtil.getCurrentUser(jwt);
+        if (!userLogin.getRole().equals("COACH")) {
+            return ResponseEntity.status(403).body("Chỉ huấn luyện viên mới có quyền điểm danh");
+        }
+
+        if (userLogin.getStatus() == UserStatus.BANNED) {
+            // Log chuyên nghiệp cho trường hợp BANNED
+            log.warn("AUTH_DENIED | Status: BANNED | Subject ID: {} | Account ID: {} | Reason: Explicitly blocked.",
+                    jwt.getSubject(),
+                    userLogin.getIdAccount());
+
+            return ResponseEntity.status(403).body("Tài khoản huấn luyện viên đang bị vô hiệu hóa");
+
+        } else if (userLogin.getStatus() == UserStatus.INACTIVE) {
+            // Log chuyên nghiệp cho trường hợp INACTIVE
+            log.warn("AUTH_DENIED | Status: INACTIVE | Subject ID: {} | Account ID: {} | Reason: Account pending activation or approval.",
+                    jwt.getSubject(),
+                    userLogin.getIdAccount());
+
+            // Hoàn thiện ResponseEntity cho INACTIVE
+            return ResponseEntity.status(403).body("Tài khoản chưa được kích hoạt hoặc đang chờ duyệt");
+        }
 
         createRequest.setIdUser(idUser);
         coachAttendanceService.markCoachAttendance(createRequest);
@@ -50,7 +79,7 @@ public class CoachAttendanceController {
         LocalDate date = createRequest.getCreatedAt().toLocalDate();
 
         String key = coachAttendanceRedis.getKeyByIdCoachAndYearAndMonth(
-                idUser,
+                userLogin.getIdAccount(),
                 date.getYear(),
                 date.getMonthValue());
 

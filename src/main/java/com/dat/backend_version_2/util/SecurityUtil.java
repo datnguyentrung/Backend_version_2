@@ -2,6 +2,7 @@ package com.dat.backend_version_2.util;
 
 
 import com.dat.backend_version_2.dto.authentication.LoginRes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -143,5 +145,14 @@ public class SecurityUtil {
         }
 
         return Optional.empty();
+    }
+
+    public static LoginRes.UserLogin getCurrentUser(Jwt jwt) {
+        Map<String, Object> userMap = jwt.getClaim("user");
+
+        // Dùng ObjectMapper để convert Map sang Object
+        ObjectMapper mapper = new ObjectMapper();
+
+        return mapper.convertValue(userMap, LoginRes.UserLogin.class);
     }
 }
